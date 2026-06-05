@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Shell } from "@/components/Shell";
-import { Wallet, HandCoins, Gem, Vault, Gift, Users, Megaphone, Info, Zap, Power } from "lucide-react";
+import { Wallet, HandCoins, Gem, Vault, Gift, Users, Megaphone, Info, Zap, Power, Bell, TrendingUp, ArrowUpRight } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -13,57 +13,109 @@ export const Route = createFileRoute("/")({
 });
 
 const tiles = [
-  { label: "DEPOSIT", Icon: Wallet },
-  { label: "WITHDRAW", Icon: HandCoins },
-  { label: "LEVELS", Icon: Gem },
-  { label: "WEALTH", Icon: Vault },
-  { label: "GIFT CARD", Icon: Gift },
-  { label: "MY TEAM", Icon: Users },
-  { label: "NEWS", Icon: Megaphone },
-  { label: "BENEFITS", Icon: Info },
-  { label: "PROMO", Icon: Zap, accent: true },
+  { label: "Deposit", Icon: Wallet, tint: "from-emerald-400/20 to-emerald-500/5", iconColor: "text-emerald-600" },
+  { label: "Withdraw", Icon: HandCoins, tint: "from-rose-400/20 to-rose-500/5", iconColor: "text-rose-600" },
+  { label: "Levels", Icon: Gem, tint: "from-violet-400/20 to-violet-500/5", iconColor: "text-violet-600" },
+  { label: "Wealth", Icon: Vault, tint: "from-amber-400/20 to-amber-500/5", iconColor: "text-amber-600" },
+  { label: "Gift Card", Icon: Gift, tint: "from-pink-400/20 to-pink-500/5", iconColor: "text-pink-600" },
+  { label: "My Team", Icon: Users, tint: "from-sky-400/20 to-sky-500/5", iconColor: "text-sky-600" },
+  { label: "News", Icon: Megaphone, tint: "from-indigo-400/20 to-indigo-500/5", iconColor: "text-indigo-600" },
+  { label: "Benefits", Icon: Info, tint: "from-teal-400/20 to-teal-500/5", iconColor: "text-teal-600" },
+  { label: "Promo", Icon: Zap, tint: "from-orange-400/30 to-orange-500/10", iconColor: "text-orange-600" },
 ];
 
 function Index() {
   return (
-    <Shell>
-      <div className="bg-[#2456a6] rounded-b-[2rem] px-6 pt-8 pb-16 text-white">
-        <div className="flex items-center justify-between">
+    <Shell bg="bg-slate-50">
+      {/* Header */}
+      <div className="relative px-5 pt-10 pb-32 text-white overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1e3a8a] via-[#2456a6] to-[#3b82f6]" />
+        <div className="absolute -top-20 -right-16 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
+        <div className="absolute -bottom-10 -left-10 h-48 w-48 rounded-full bg-orange-400/20 blur-3xl" />
+
+        <div className="relative flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-14 w-14 rounded-2xl bg-white/20 flex items-center justify-center text-2xl font-bold">J</div>
+            <div className="h-12 w-12 rounded-2xl bg-white/15 backdrop-blur-md ring-1 ring-white/20 flex items-center justify-center text-lg font-bold">Jn</div>
             <div>
-              <p className="text-xl font-bold">Hi, Jn</p>
-              <p className="text-xs tracking-widest text-white/70">MEMBER DASHBOARD</p>
+              <p className="text-xs text-white/60">Welcome back</p>
+              <p className="text-base font-semibold">Hi, Jn 👋</p>
             </div>
           </div>
-          <button className="h-10 w-10 rounded-xl bg-white/15 flex items-center justify-center">
-            <Power className="h-5 w-5" />
+          <div className="flex items-center gap-2">
+            <button className="h-10 w-10 rounded-xl bg-white/10 backdrop-blur-md ring-1 ring-white/15 flex items-center justify-center">
+              <Bell className="h-4 w-4" />
+            </button>
+            <button className="h-10 w-10 rounded-xl bg-white/10 backdrop-blur-md ring-1 ring-white/15 flex items-center justify-center">
+              <Power className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Balance card */}
+        <div className="relative mt-8 rounded-3xl bg-white/10 backdrop-blur-xl ring-1 ring-white/20 p-5 shadow-2xl">
+          <div className="flex items-center justify-between">
+            <p className="text-xs uppercase tracking-widest text-white/70">Current Balance</p>
+            <span className="text-[10px] px-2 py-1 rounded-full bg-emerald-400/20 text-emerald-200 ring-1 ring-emerald-300/30 flex items-center gap-1">
+              <TrendingUp className="h-3 w-3" /> +12.4%
+            </span>
+          </div>
+          <p className="mt-2 text-4xl font-extrabold tracking-tight">
+            KES 327<span className="text-lg font-medium text-white/70">.00</span>
+          </p>
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <button className="rounded-xl bg-white text-[#1e3a8a] font-semibold text-sm py-2.5 flex items-center justify-center gap-1.5 shadow-lg">
+              <Wallet className="h-4 w-4" /> Deposit
+            </button>
+            <button className="rounded-xl bg-white/15 ring-1 ring-white/25 text-white font-semibold text-sm py-2.5 flex items-center justify-center gap-1.5">
+              <HandCoins className="h-4 w-4" /> Withdraw
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="px-4 -mt-20 grid grid-cols-2 gap-3 relative z-10">
+        <div className="bg-white rounded-2xl p-4 shadow-sm ring-1 ring-black/5">
+          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Total Revenue</p>
+          <p className="text-xl font-bold text-slate-900 mt-1">KES 327</p>
+          <div className="flex items-center gap-1 mt-1 text-emerald-600 text-xs font-medium">
+            <ArrowUpRight className="h-3 w-3" /> +5.2%
+          </div>
+        </div>
+        <div className="bg-gradient-to-br from-slate-900 to-slate-700 rounded-2xl p-4 shadow-sm text-white">
+          <p className="text-[10px] uppercase tracking-wider text-white/60 font-semibold">Level Status</p>
+          <p className="text-xl font-bold mt-1">Level 3</p>
+          <div className="mt-2 h-1.5 rounded-full bg-white/15 overflow-hidden">
+            <div className="h-full w-3/5 bg-gradient-to-r from-amber-400 to-orange-400" />
+          </div>
+        </div>
+      </div>
+
+      {/* Quick actions */}
+      <div className="px-5 mt-7 flex items-center justify-between">
+        <h2 className="text-sm font-bold text-slate-900">Quick Actions</h2>
+        <button className="text-xs font-medium text-slate-500">See all</button>
+      </div>
+      <div className="px-4 mt-3 grid grid-cols-3 gap-3">
+        {tiles.map(({ label, Icon, tint, iconColor }) => (
+          <button
+            key={label}
+            className="group bg-white rounded-2xl p-3 flex flex-col items-center gap-2 ring-1 ring-black/5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+          >
+            <div className={`h-11 w-11 rounded-xl bg-gradient-to-br ${tint} flex items-center justify-center`}>
+              <Icon className={`h-5 w-5 ${iconColor}`} />
+            </div>
+            <p className="text-[11px] font-semibold text-slate-700">{label}</p>
           </button>
-        </div>
-        <div className="mt-8">
-          <p className="text-xs tracking-widest text-white/70">CURRENT BALANCE</p>
-          <p className="text-5xl font-extrabold mt-1">KES 327<span className="text-base align-top">.00</span></p>
-        </div>
-      </div>
-      <div className="px-4 -mt-10 grid grid-cols-2 gap-4">
-        <div className="bg-white rounded-3xl py-5 text-center shadow-lg">
-          <p className="text-xs tracking-widest text-muted-foreground">TOTAL REVENUE</p>
-          <p className="text-2xl font-bold text-[#2456a6] mt-1">KES 327</p>
-        </div>
-        <div className="bg-white rounded-3xl py-5 text-center shadow-lg">
-          <p className="text-xs tracking-widest text-muted-foreground">LEVEL STATUS</p>
-          <p className="text-2xl font-bold text-[#2456a6] mt-1">Level 3</p>
-        </div>
-      </div>
-      <div className="px-4 mt-6 grid grid-cols-3 gap-4">
-        {tiles.map(({ label, Icon, accent }) => (
-          <div key={label} className="bg-white rounded-3xl p-4 flex flex-col items-center gap-2 shadow-md">
-            <div className={`h-12 w-12 rounded-2xl flex items-center justify-center ${accent ? "bg-[#2456a6]" : "bg-[#eaf0fb]"}`}>
-              <Icon className={`h-6 w-6 ${accent ? "text-[#f5c518]" : "text-[#2456a6]"}`} />
-            </div>
-            <p className="text-xs font-bold tracking-wide">{label}</p>
-          </div>
         ))}
+      </div>
+
+      {/* Promo banner */}
+      <div className="mx-4 mt-6 relative overflow-hidden rounded-2xl bg-gradient-to-r from-orange-500 to-pink-500 p-5 text-white shadow-lg">
+        <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/15 blur-2xl" />
+        <p className="text-[10px] uppercase tracking-widest text-white/80 font-semibold">Invite & Earn</p>
+        <p className="mt-1 text-lg font-bold leading-tight">Get KES 100 for every friend you refer</p>
+        <button className="mt-3 rounded-full bg-white text-orange-600 font-semibold text-xs px-4 py-2">Share link</button>
       </div>
     </Shell>
   );
