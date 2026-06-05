@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Shell } from "@/components/Shell";
 import { Wallet, HandCoins, Gem, Vault, Gift, Users, Megaphone, Info, Zap, Power, Bell, TrendingUp, ArrowUpRight } from "lucide-react";
 
@@ -13,12 +13,12 @@ export const Route = createFileRoute("/")({
 });
 
 const tiles = [
-  { label: "Deposit", Icon: Wallet, tint: "from-emerald-400/20 to-emerald-500/5", iconColor: "text-emerald-600" },
-  { label: "Withdraw", Icon: HandCoins, tint: "from-rose-400/20 to-rose-500/5", iconColor: "text-rose-600" },
+  { label: "Deposit", Icon: Wallet, tint: "from-emerald-400/20 to-emerald-500/5", iconColor: "text-emerald-600", to: "/deposit" as const },
+  { label: "Withdraw", Icon: HandCoins, tint: "from-rose-400/20 to-rose-500/5", iconColor: "text-rose-600", to: "/withdraw" as const },
   { label: "Levels", Icon: Gem, tint: "from-violet-400/20 to-violet-500/5", iconColor: "text-violet-600" },
   { label: "Wealth", Icon: Vault, tint: "from-amber-400/20 to-amber-500/5", iconColor: "text-amber-600" },
   { label: "Gift Card", Icon: Gift, tint: "from-pink-400/20 to-pink-500/5", iconColor: "text-pink-600" },
-  { label: "My Team", Icon: Users, tint: "from-sky-400/20 to-sky-500/5", iconColor: "text-sky-600" },
+  { label: "My Team", Icon: Users, tint: "from-sky-400/20 to-sky-500/5", iconColor: "text-sky-600", to: "/team" as const },
   { label: "News", Icon: Megaphone, tint: "from-indigo-400/20 to-indigo-500/5", iconColor: "text-indigo-600" },
   { label: "Benefits", Icon: Info, tint: "from-teal-400/20 to-teal-500/5", iconColor: "text-teal-600" },
   { label: "Promo", Icon: Zap, tint: "from-orange-400/30 to-orange-500/10", iconColor: "text-orange-600" },
@@ -63,12 +63,12 @@ function Index() {
             KES 327<span className="text-lg font-medium text-white/70">.00</span>
           </p>
           <div className="mt-4 grid grid-cols-2 gap-2">
-            <button className="rounded-xl bg-white text-[#1e3a8a] font-semibold text-sm py-2.5 flex items-center justify-center gap-1.5 shadow-lg">
+            <Link to="/deposit" className="rounded-xl bg-white text-[#1e3a8a] font-semibold text-sm py-2.5 flex items-center justify-center gap-1.5 shadow-lg">
               <Wallet className="h-4 w-4" /> Deposit
-            </button>
-            <button className="rounded-xl bg-white/15 ring-1 ring-white/25 text-white font-semibold text-sm py-2.5 flex items-center justify-center gap-1.5">
+            </Link>
+            <Link to="/withdraw" className="rounded-xl bg-white/15 ring-1 ring-white/25 text-white font-semibold text-sm py-2.5 flex items-center justify-center gap-1.5">
               <HandCoins className="h-4 w-4" /> Withdraw
-            </button>
+            </Link>
           </div>
         </div>
       </div>
@@ -97,17 +97,22 @@ function Index() {
         <button className="text-xs font-medium text-slate-500">See all</button>
       </div>
       <div className="px-4 mt-3 grid grid-cols-3 gap-3">
-        {tiles.map(({ label, Icon, tint, iconColor }) => (
-          <button
-            key={label}
-            className="group bg-white rounded-2xl p-3 flex flex-col items-center gap-2 ring-1 ring-black/5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
-          >
-            <div className={`h-11 w-11 rounded-xl bg-gradient-to-br ${tint} flex items-center justify-center`}>
-              <Icon className={`h-5 w-5 ${iconColor}`} />
-            </div>
-            <p className="text-[11px] font-semibold text-slate-700">{label}</p>
-          </button>
-        ))}
+        {tiles.map(({ label, Icon, tint, iconColor, to }) => {
+          const inner = (
+            <>
+              <div className={`h-11 w-11 rounded-xl bg-gradient-to-br ${tint} flex items-center justify-center`}>
+                <Icon className={`h-5 w-5 ${iconColor}`} />
+              </div>
+              <p className="text-[11px] font-semibold text-slate-700">{label}</p>
+            </>
+          );
+          const cls = "group bg-white rounded-2xl p-3 flex flex-col items-center gap-2 ring-1 ring-black/5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all";
+          return to ? (
+            <Link key={label} to={to} className={cls}>{inner}</Link>
+          ) : (
+            <button key={label} className={cls}>{inner}</button>
+          );
+        })}
       </div>
 
       {/* Promo banner */}

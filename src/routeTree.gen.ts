@@ -9,12 +9,19 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WithdrawRouteImport } from './routes/withdraw'
 import { Route as TeamRouteImport } from './routes/team'
 import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PackagesRouteImport } from './routes/packages'
+import { Route as DepositRouteImport } from './routes/deposit'
 import { Route as IndexRouteImport } from './routes/index'
 
+const WithdrawRoute = WithdrawRouteImport.update({
+  id: '/withdraw',
+  path: '/withdraw',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TeamRoute = TeamRouteImport.update({
   id: '/team',
   path: '/team',
@@ -35,6 +42,11 @@ const PackagesRoute = PackagesRouteImport.update({
   path: '/packages',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DepositRoute = DepositRouteImport.update({
+  id: '/deposit',
+  path: '/deposit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -43,44 +55,81 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/deposit': typeof DepositRoute
   '/packages': typeof PackagesRoute
   '/profile': typeof ProfileRoute
   '/tasks': typeof TasksRoute
   '/team': typeof TeamRoute
+  '/withdraw': typeof WithdrawRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/deposit': typeof DepositRoute
   '/packages': typeof PackagesRoute
   '/profile': typeof ProfileRoute
   '/tasks': typeof TasksRoute
   '/team': typeof TeamRoute
+  '/withdraw': typeof WithdrawRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/deposit': typeof DepositRoute
   '/packages': typeof PackagesRoute
   '/profile': typeof ProfileRoute
   '/tasks': typeof TasksRoute
   '/team': typeof TeamRoute
+  '/withdraw': typeof WithdrawRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/packages' | '/profile' | '/tasks' | '/team'
+  fullPaths:
+    | '/'
+    | '/deposit'
+    | '/packages'
+    | '/profile'
+    | '/tasks'
+    | '/team'
+    | '/withdraw'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/packages' | '/profile' | '/tasks' | '/team'
-  id: '__root__' | '/' | '/packages' | '/profile' | '/tasks' | '/team'
+  to:
+    | '/'
+    | '/deposit'
+    | '/packages'
+    | '/profile'
+    | '/tasks'
+    | '/team'
+    | '/withdraw'
+  id:
+    | '__root__'
+    | '/'
+    | '/deposit'
+    | '/packages'
+    | '/profile'
+    | '/tasks'
+    | '/team'
+    | '/withdraw'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DepositRoute: typeof DepositRoute
   PackagesRoute: typeof PackagesRoute
   ProfileRoute: typeof ProfileRoute
   TasksRoute: typeof TasksRoute
   TeamRoute: typeof TeamRoute
+  WithdrawRoute: typeof WithdrawRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/withdraw': {
+      id: '/withdraw'
+      path: '/withdraw'
+      fullPath: '/withdraw'
+      preLoaderRoute: typeof WithdrawRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/team': {
       id: '/team'
       path: '/team'
@@ -109,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PackagesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/deposit': {
+      id: '/deposit'
+      path: '/deposit'
+      fullPath: '/deposit'
+      preLoaderRoute: typeof DepositRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -121,10 +177,12 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DepositRoute: DepositRoute,
   PackagesRoute: PackagesRoute,
   ProfileRoute: ProfileRoute,
   TasksRoute: TasksRoute,
   TeamRoute: TeamRoute,
+  WithdrawRoute: WithdrawRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
