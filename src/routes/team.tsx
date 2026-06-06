@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Shell } from "@/components/Shell";
-import { Users, Link2 } from "lucide-react";
+import { Users, Link2, UserCheck, UserX, ArrowDownToLine, ArrowUpFromLine, Layers } from "lucide-react";
 import { useState } from "react";
 
 export const Route = createFileRoute("/team")({
@@ -11,6 +11,16 @@ export const Route = createFileRoute("/team")({
 function Team() {
   const link = "https://monvex-tech.site/register.php";
   const [copied, setCopied] = useState(false);
+
+  const stats = [
+    { label: "Total Subordinates", value: "0", Icon: Users, tint: "bg-black", iconColor: "text-[#f5c518]" },
+    { label: "Active Subordinates", value: "0", Icon: UserCheck, tint: "bg-emerald-500", iconColor: "text-white" },
+    { label: "Inactive Subordinates", value: "0", Icon: UserX, tint: "bg-rose-500", iconColor: "text-white" },
+    { label: "Team Recharge", value: "KSH 0", Icon: ArrowDownToLine, tint: "bg-blue-600", iconColor: "text-white" },
+    { label: "Team Withdrawal", value: "KSH 0", Icon: ArrowUpFromLine, tint: "bg-orange-500", iconColor: "text-white" },
+    { label: "Active Packages", value: "0", Icon: Layers, tint: "bg-violet-600", iconColor: "text-white" },
+  ];
+
   return (
     <Shell>
       <div className="px-4 pt-6">
@@ -21,15 +31,20 @@ function Team() {
           </div>
           <button className="bg-black text-white px-5 py-2 rounded-full font-semibold text-sm">Logout</button>
         </div>
-        <div className="mt-5 bg-[#fff8dc] rounded-3xl p-5 flex items-center justify-between shadow-md">
-          <div>
-            <p className="text-xs tracking-widest text-muted-foreground">TOTAL MEMBERS</p>
-            <p className="text-3xl font-extrabold">0</p>
-          </div>
-          <div className="h-12 w-12 rounded-2xl bg-black flex items-center justify-center">
-            <Users className="h-6 w-6 text-[#f5c518]" />
-          </div>
+
+        {/* Stats grid */}
+        <div className="mt-5 grid grid-cols-2 gap-3">
+          {stats.map(({ label, value, Icon, tint, iconColor }) => (
+            <div key={label} className="bg-white rounded-2xl p-4 shadow-md">
+              <div className={`h-9 w-9 rounded-xl ${tint} flex items-center justify-center`}>
+                <Icon className={`h-4 w-4 ${iconColor}`} />
+              </div>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-3">{label}</p>
+              <p className="text-xl font-extrabold mt-1">{value}</p>
+            </div>
+          ))}
         </div>
+
         <div className="mt-5 bg-white rounded-3xl p-5 shadow-md">
           <div className="flex items-center gap-2">
             <Link2 className="h-5 w-5 text-[#f5c518]" />
@@ -43,19 +58,38 @@ function Team() {
             >{copied ? "Copied" : "Copy"}</button>
           </div>
         </div>
+
+        {/* Subordinates table */}
+        <div className="mt-6">
+          <div className="flex justify-between items-center mb-3">
+            <p className="font-extrabold tracking-widest">SUBORDINATES</p>
+            <span className="bg-white rounded-full px-4 py-1 text-xs font-bold">0 USERS</span>
+          </div>
+          <div className="bg-white rounded-3xl shadow-md overflow-hidden">
+            <div className="grid grid-cols-4 gap-2 px-4 py-3 bg-black text-white text-[10px] uppercase tracking-wider font-bold">
+              <div>Phone</div>
+              <div>Package</div>
+              <div className="text-center">Status</div>
+              <div className="text-right">Joined</div>
+            </div>
+            <div className="py-10 text-center text-sm tracking-widest font-semibold text-muted-foreground">
+              NO SUBORDINATES YET
+            </div>
+          </div>
+        </div>
+
+        {/* Level breakdown */}
         {[
-          { label: "DIRECT - LEVEL 1" },
-          { label: "SECONDARY - LEVEL 2" },
-          { label: "TERTIARY - LEVEL 3" },
+          { label: "DIRECT - LEVEL 1", commission: "12%" },
+          { label: "SECONDARY - LEVEL 2", commission: "3%" },
+          { label: "TERTIARY - LEVEL 3", commission: "1%" },
         ].map((t) => (
-          <div key={t.label} className="mt-6">
-            <div className="flex justify-between items-center">
-              <p className="font-extrabold tracking-widest">{t.label}</p>
-              <span className="bg-white rounded-full px-4 py-1 text-xs font-bold">0 USERS</span>
+          <div key={t.label} className="mt-4 bg-white rounded-2xl p-4 shadow-md flex justify-between items-center">
+            <div>
+              <p className="font-extrabold tracking-widest text-sm">{t.label}</p>
+              <p className="text-xs text-muted-foreground mt-1">Commission {t.commission}</p>
             </div>
-            <div className="mt-3 bg-[#f0d97a]/70 rounded-full py-6 text-center text-sm tracking-widest font-semibold text-[#7a6420]">
-              NO TEAM MEMBERS YET
-            </div>
+            <span className="bg-[#f5c518] rounded-full px-4 py-1 text-xs font-bold">0 USERS</span>
           </div>
         ))}
       </div>
