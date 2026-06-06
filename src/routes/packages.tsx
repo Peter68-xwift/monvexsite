@@ -7,9 +7,10 @@ export const Route = createFileRoute("/packages")({
 });
 
 const plans = [
-  { tag: "DELL", level: "Level 1", price: "800", daily: "80", total: "1,280" },
-  { tag: "HP", level: "Level 2", price: "1,800", daily: "130", total: "2,600" },
-  { tag: "LENOVO", level: "Level 3", price: "3,500", daily: "260", total: "5,200" },
+  { tag: "C1", level: "Level C1", price: "800", daily: "40", total: "1,200" },
+  { tag: "C2", level: "Level C2", price: "1,800", daily: "90", total: "2,700" },
+  { tag: "C3", level: "Level C3", price: "3,600", daily: "180", total: "5,400" },
+  { tag: "C4", level: "Level C4", price: "7,200", daily: "360", total: "10,800" },
 ];
 
 function Packages() {
