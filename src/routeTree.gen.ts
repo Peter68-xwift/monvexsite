@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WithdrawRouteImport } from './routes/withdraw'
 import { Route as TeamRouteImport } from './routes/team'
 import { Route as TasksRouteImport } from './routes/tasks'
+import { Route as RecordsRouteImport } from './routes/records'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PackagesRouteImport } from './routes/packages'
 import { Route as DepositRouteImport } from './routes/deposit'
@@ -31,6 +32,11 @@ const TeamRoute = TeamRouteImport.update({
 const TasksRoute = TasksRouteImport.update({
   id: '/tasks',
   path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecordsRoute = RecordsRouteImport.update({
+  id: '/records',
+  path: '/records',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/deposit': typeof DepositRoute
   '/packages': typeof PackagesRoute
   '/profile': typeof ProfileRoute
+  '/records': typeof RecordsRoute
   '/tasks': typeof TasksRoute
   '/team': typeof TeamRoute
   '/withdraw': typeof WithdrawRoute
@@ -75,6 +82,7 @@ export interface FileRoutesByTo {
   '/deposit': typeof DepositRoute
   '/packages': typeof PackagesRoute
   '/profile': typeof ProfileRoute
+  '/records': typeof RecordsRoute
   '/tasks': typeof TasksRoute
   '/team': typeof TeamRoute
   '/withdraw': typeof WithdrawRoute
@@ -86,6 +94,7 @@ export interface FileRoutesById {
   '/deposit': typeof DepositRoute
   '/packages': typeof PackagesRoute
   '/profile': typeof ProfileRoute
+  '/records': typeof RecordsRoute
   '/tasks': typeof TasksRoute
   '/team': typeof TeamRoute
   '/withdraw': typeof WithdrawRoute
@@ -98,6 +107,7 @@ export interface FileRouteTypes {
     | '/deposit'
     | '/packages'
     | '/profile'
+    | '/records'
     | '/tasks'
     | '/team'
     | '/withdraw'
@@ -108,6 +118,7 @@ export interface FileRouteTypes {
     | '/deposit'
     | '/packages'
     | '/profile'
+    | '/records'
     | '/tasks'
     | '/team'
     | '/withdraw'
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
     | '/deposit'
     | '/packages'
     | '/profile'
+    | '/records'
     | '/tasks'
     | '/team'
     | '/withdraw'
@@ -129,6 +141,7 @@ export interface RootRouteChildren {
   DepositRoute: typeof DepositRoute
   PackagesRoute: typeof PackagesRoute
   ProfileRoute: typeof ProfileRoute
+  RecordsRoute: typeof RecordsRoute
   TasksRoute: typeof TasksRoute
   TeamRoute: typeof TeamRoute
   WithdrawRoute: typeof WithdrawRoute
@@ -155,6 +168,13 @@ declare module '@tanstack/react-router' {
       path: '/tasks'
       fullPath: '/tasks'
       preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/records': {
+      id: '/records'
+      path: '/records'
+      fullPath: '/records'
+      preLoaderRoute: typeof RecordsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -201,6 +221,7 @@ const rootRouteChildren: RootRouteChildren = {
   DepositRoute: DepositRoute,
   PackagesRoute: PackagesRoute,
   ProfileRoute: ProfileRoute,
+  RecordsRoute: RecordsRoute,
   TasksRoute: TasksRoute,
   TeamRoute: TeamRoute,
   WithdrawRoute: WithdrawRoute,
