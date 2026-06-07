@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WithdrawRouteImport } from './routes/withdraw'
 import { Route as TeamRouteImport } from './routes/team'
 import { Route as TasksRouteImport } from './routes/tasks'
+import { Route as SecurityRouteImport } from './routes/security'
 import { Route as RecordsRouteImport } from './routes/records'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PackagesRouteImport } from './routes/packages'
@@ -32,6 +33,11 @@ const TeamRoute = TeamRouteImport.update({
 const TasksRoute = TasksRouteImport.update({
   id: '/tasks',
   path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SecurityRoute = SecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RecordsRoute = RecordsRouteImport.update({
@@ -72,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/packages': typeof PackagesRoute
   '/profile': typeof ProfileRoute
   '/records': typeof RecordsRoute
+  '/security': typeof SecurityRoute
   '/tasks': typeof TasksRoute
   '/team': typeof TeamRoute
   '/withdraw': typeof WithdrawRoute
@@ -83,6 +90,7 @@ export interface FileRoutesByTo {
   '/packages': typeof PackagesRoute
   '/profile': typeof ProfileRoute
   '/records': typeof RecordsRoute
+  '/security': typeof SecurityRoute
   '/tasks': typeof TasksRoute
   '/team': typeof TeamRoute
   '/withdraw': typeof WithdrawRoute
@@ -95,6 +103,7 @@ export interface FileRoutesById {
   '/packages': typeof PackagesRoute
   '/profile': typeof ProfileRoute
   '/records': typeof RecordsRoute
+  '/security': typeof SecurityRoute
   '/tasks': typeof TasksRoute
   '/team': typeof TeamRoute
   '/withdraw': typeof WithdrawRoute
@@ -108,6 +117,7 @@ export interface FileRouteTypes {
     | '/packages'
     | '/profile'
     | '/records'
+    | '/security'
     | '/tasks'
     | '/team'
     | '/withdraw'
@@ -119,6 +129,7 @@ export interface FileRouteTypes {
     | '/packages'
     | '/profile'
     | '/records'
+    | '/security'
     | '/tasks'
     | '/team'
     | '/withdraw'
@@ -130,6 +141,7 @@ export interface FileRouteTypes {
     | '/packages'
     | '/profile'
     | '/records'
+    | '/security'
     | '/tasks'
     | '/team'
     | '/withdraw'
@@ -142,6 +154,7 @@ export interface RootRouteChildren {
   PackagesRoute: typeof PackagesRoute
   ProfileRoute: typeof ProfileRoute
   RecordsRoute: typeof RecordsRoute
+  SecurityRoute: typeof SecurityRoute
   TasksRoute: typeof TasksRoute
   TeamRoute: typeof TeamRoute
   WithdrawRoute: typeof WithdrawRoute
@@ -168,6 +181,13 @@ declare module '@tanstack/react-router' {
       path: '/tasks'
       fullPath: '/tasks'
       preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/security': {
+      id: '/security'
+      path: '/security'
+      fullPath: '/security'
+      preLoaderRoute: typeof SecurityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/records': {
@@ -222,6 +242,7 @@ const rootRouteChildren: RootRouteChildren = {
   PackagesRoute: PackagesRoute,
   ProfileRoute: ProfileRoute,
   RecordsRoute: RecordsRoute,
+  SecurityRoute: SecurityRoute,
   TasksRoute: TasksRoute,
   TeamRoute: TeamRoute,
   WithdrawRoute: WithdrawRoute,
