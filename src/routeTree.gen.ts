@@ -15,6 +15,7 @@ import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PackagesRouteImport } from './routes/packages'
 import { Route as DepositRouteImport } from './routes/deposit'
+import { Route as CompanyRouteImport } from './routes/company'
 import { Route as IndexRouteImport } from './routes/index'
 
 const WithdrawRoute = WithdrawRouteImport.update({
@@ -47,6 +48,11 @@ const DepositRoute = DepositRouteImport.update({
   path: '/deposit',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CompanyRoute = CompanyRouteImport.update({
+  id: '/company',
+  path: '/company',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -55,6 +61,7 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/company': typeof CompanyRoute
   '/deposit': typeof DepositRoute
   '/packages': typeof PackagesRoute
   '/profile': typeof ProfileRoute
@@ -64,6 +71,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/company': typeof CompanyRoute
   '/deposit': typeof DepositRoute
   '/packages': typeof PackagesRoute
   '/profile': typeof ProfileRoute
@@ -74,6 +82,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/company': typeof CompanyRoute
   '/deposit': typeof DepositRoute
   '/packages': typeof PackagesRoute
   '/profile': typeof ProfileRoute
@@ -85,6 +94,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/company'
     | '/deposit'
     | '/packages'
     | '/profile'
@@ -94,6 +104,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/company'
     | '/deposit'
     | '/packages'
     | '/profile'
@@ -103,6 +114,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/company'
     | '/deposit'
     | '/packages'
     | '/profile'
@@ -113,6 +125,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CompanyRoute: typeof CompanyRoute
   DepositRoute: typeof DepositRoute
   PackagesRoute: typeof PackagesRoute
   ProfileRoute: typeof ProfileRoute
@@ -165,6 +178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DepositRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/company': {
+      id: '/company'
+      path: '/company'
+      fullPath: '/company'
+      preLoaderRoute: typeof CompanyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -177,6 +197,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CompanyRoute: CompanyRoute,
   DepositRoute: DepositRoute,
   PackagesRoute: PackagesRoute,
   ProfileRoute: ProfileRoute,
