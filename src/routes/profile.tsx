@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { Shell } from "@/components/Shell";
 import { Monitor, MessageCircle, ShieldCheck, Smartphone } from "lucide-react";
 
@@ -8,10 +9,10 @@ export const Route = createFileRoute("/profile")({
 });
 
 const links = [
-  { label: "Company Information", Icon: Monitor, color: "text-[#2456a6]" },
-  { label: "Financial Records", Icon: MessageCircle, color: "text-sky-400" },
-  { label: "Account Security", Icon: ShieldCheck, color: "text-amber-700" },
-  { label: "App Download", Icon: Smartphone, color: "text-rose-400" },
+  { label: "Company Information", Icon: Monitor, color: "text-[#2456a6]", to: "/company" },
+  { label: "Financial Records", Icon: MessageCircle, color: "text-sky-400", to: "/records" },
+  { label: "Account Security", Icon: ShieldCheck, color: "text-amber-700", to: "/security" },
+  { label: "App Download", Icon: Smartphone, color: "text-rose-400", to: "/download" },
 ];
 
 function Profile() {
@@ -41,11 +42,11 @@ function Profile() {
           <button className="bg-emerald-500 text-white rounded-2xl py-4 font-bold">Redeem CDK</button>
         </div>
         <div className="mt-6 bg-white rounded-3xl shadow-md divide-y divide-black/5">
-          {links.map(({ label, Icon, color }) => (
-            <div key={label} className="flex items-center gap-4 px-5 py-4">
+          {links.map(({ label, Icon, color, to }) => (
+            <Link key={label} to={to} className="flex items-center gap-4 px-5 py-4">
               <Icon className={`h-6 w-6 ${color}`} />
               <p className="font-bold">{label}</p>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
