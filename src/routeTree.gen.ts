@@ -12,9 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WithdrawRouteImport } from './routes/withdraw'
 import { Route as TeamRouteImport } from './routes/team'
 import { Route as TasksRouteImport } from './routes/tasks'
+import { Route as SecurityRouteImport } from './routes/security'
+import { Route as RecordsRouteImport } from './routes/records'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PackagesRouteImport } from './routes/packages'
+import { Route as DownloadRouteImport } from './routes/download'
 import { Route as DepositRouteImport } from './routes/deposit'
+import { Route as CompanyRouteImport } from './routes/company'
 import { Route as IndexRouteImport } from './routes/index'
 
 const WithdrawRoute = WithdrawRouteImport.update({
@@ -32,6 +36,16 @@ const TasksRoute = TasksRouteImport.update({
   path: '/tasks',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SecurityRoute = SecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecordsRoute = RecordsRouteImport.update({
+  id: '/records',
+  path: '/records',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -42,9 +56,19 @@ const PackagesRoute = PackagesRouteImport.update({
   path: '/packages',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DownloadRoute = DownloadRouteImport.update({
+  id: '/download',
+  path: '/download',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DepositRoute = DepositRouteImport.update({
   id: '/deposit',
   path: '/deposit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompanyRoute = CompanyRouteImport.update({
+  id: '/company',
+  path: '/company',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -55,18 +79,26 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/company': typeof CompanyRoute
   '/deposit': typeof DepositRoute
+  '/download': typeof DownloadRoute
   '/packages': typeof PackagesRoute
   '/profile': typeof ProfileRoute
+  '/records': typeof RecordsRoute
+  '/security': typeof SecurityRoute
   '/tasks': typeof TasksRoute
   '/team': typeof TeamRoute
   '/withdraw': typeof WithdrawRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/company': typeof CompanyRoute
   '/deposit': typeof DepositRoute
+  '/download': typeof DownloadRoute
   '/packages': typeof PackagesRoute
   '/profile': typeof ProfileRoute
+  '/records': typeof RecordsRoute
+  '/security': typeof SecurityRoute
   '/tasks': typeof TasksRoute
   '/team': typeof TeamRoute
   '/withdraw': typeof WithdrawRoute
@@ -74,9 +106,13 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/company': typeof CompanyRoute
   '/deposit': typeof DepositRoute
+  '/download': typeof DownloadRoute
   '/packages': typeof PackagesRoute
   '/profile': typeof ProfileRoute
+  '/records': typeof RecordsRoute
+  '/security': typeof SecurityRoute
   '/tasks': typeof TasksRoute
   '/team': typeof TeamRoute
   '/withdraw': typeof WithdrawRoute
@@ -85,27 +121,39 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/company'
     | '/deposit'
+    | '/download'
     | '/packages'
     | '/profile'
+    | '/records'
+    | '/security'
     | '/tasks'
     | '/team'
     | '/withdraw'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/company'
     | '/deposit'
+    | '/download'
     | '/packages'
     | '/profile'
+    | '/records'
+    | '/security'
     | '/tasks'
     | '/team'
     | '/withdraw'
   id:
     | '__root__'
     | '/'
+    | '/company'
     | '/deposit'
+    | '/download'
     | '/packages'
     | '/profile'
+    | '/records'
+    | '/security'
     | '/tasks'
     | '/team'
     | '/withdraw'
@@ -113,9 +161,13 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CompanyRoute: typeof CompanyRoute
   DepositRoute: typeof DepositRoute
+  DownloadRoute: typeof DownloadRoute
   PackagesRoute: typeof PackagesRoute
   ProfileRoute: typeof ProfileRoute
+  RecordsRoute: typeof RecordsRoute
+  SecurityRoute: typeof SecurityRoute
   TasksRoute: typeof TasksRoute
   TeamRoute: typeof TeamRoute
   WithdrawRoute: typeof WithdrawRoute
@@ -144,6 +196,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TasksRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/security': {
+      id: '/security'
+      path: '/security'
+      fullPath: '/security'
+      preLoaderRoute: typeof SecurityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/records': {
+      id: '/records'
+      path: '/records'
+      fullPath: '/records'
+      preLoaderRoute: typeof RecordsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
@@ -158,11 +224,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PackagesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/download': {
+      id: '/download'
+      path: '/download'
+      fullPath: '/download'
+      preLoaderRoute: typeof DownloadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/deposit': {
       id: '/deposit'
       path: '/deposit'
       fullPath: '/deposit'
       preLoaderRoute: typeof DepositRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/company': {
+      id: '/company'
+      path: '/company'
+      fullPath: '/company'
+      preLoaderRoute: typeof CompanyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -177,9 +257,13 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CompanyRoute: CompanyRoute,
   DepositRoute: DepositRoute,
+  DownloadRoute: DownloadRoute,
   PackagesRoute: PackagesRoute,
   ProfileRoute: ProfileRoute,
+  RecordsRoute: RecordsRoute,
+  SecurityRoute: SecurityRoute,
   TasksRoute: TasksRoute,
   TeamRoute: TeamRoute,
   WithdrawRoute: WithdrawRoute,
