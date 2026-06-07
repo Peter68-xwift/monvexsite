@@ -16,6 +16,7 @@ import { Route as SecurityRouteImport } from './routes/security'
 import { Route as RecordsRouteImport } from './routes/records'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PackagesRouteImport } from './routes/packages'
+import { Route as DownloadRouteImport } from './routes/download'
 import { Route as DepositRouteImport } from './routes/deposit'
 import { Route as CompanyRouteImport } from './routes/company'
 import { Route as IndexRouteImport } from './routes/index'
@@ -55,6 +56,11 @@ const PackagesRoute = PackagesRouteImport.update({
   path: '/packages',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DownloadRoute = DownloadRouteImport.update({
+  id: '/download',
+  path: '/download',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DepositRoute = DepositRouteImport.update({
   id: '/deposit',
   path: '/deposit',
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/company': typeof CompanyRoute
   '/deposit': typeof DepositRoute
+  '/download': typeof DownloadRoute
   '/packages': typeof PackagesRoute
   '/profile': typeof ProfileRoute
   '/records': typeof RecordsRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/company': typeof CompanyRoute
   '/deposit': typeof DepositRoute
+  '/download': typeof DownloadRoute
   '/packages': typeof PackagesRoute
   '/profile': typeof ProfileRoute
   '/records': typeof RecordsRoute
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/company': typeof CompanyRoute
   '/deposit': typeof DepositRoute
+  '/download': typeof DownloadRoute
   '/packages': typeof PackagesRoute
   '/profile': typeof ProfileRoute
   '/records': typeof RecordsRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/'
     | '/company'
     | '/deposit'
+    | '/download'
     | '/packages'
     | '/profile'
     | '/records'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/'
     | '/company'
     | '/deposit'
+    | '/download'
     | '/packages'
     | '/profile'
     | '/records'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/'
     | '/company'
     | '/deposit'
+    | '/download'
     | '/packages'
     | '/profile'
     | '/records'
@@ -151,6 +163,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CompanyRoute: typeof CompanyRoute
   DepositRoute: typeof DepositRoute
+  DownloadRoute: typeof DownloadRoute
   PackagesRoute: typeof PackagesRoute
   ProfileRoute: typeof ProfileRoute
   RecordsRoute: typeof RecordsRoute
@@ -211,6 +224,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PackagesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/download': {
+      id: '/download'
+      path: '/download'
+      fullPath: '/download'
+      preLoaderRoute: typeof DownloadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/deposit': {
       id: '/deposit'
       path: '/deposit'
@@ -239,6 +259,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CompanyRoute: CompanyRoute,
   DepositRoute: DepositRoute,
+  DownloadRoute: DownloadRoute,
   PackagesRoute: PackagesRoute,
   ProfileRoute: ProfileRoute,
   RecordsRoute: RecordsRoute,
