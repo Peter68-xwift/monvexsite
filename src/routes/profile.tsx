@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { Shell } from "@/components/Shell";
 import { Monitor, MessageCircle, ShieldCheck, Smartphone } from "lucide-react";
+import { useMe } from "@/hooks/useMe";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({ meta: [{ title: "Profile — Monvex" }, { name: "description", content: "Profile and earnings on Monvex." }] }),
@@ -16,6 +17,8 @@ const links = [
 ];
 
 function Profile() {
+  const { data } = useMe();
+  const balance = Number(data?.profile?.balance ?? 0);
   return (
     <Shell>
       <div className="px-4 pt-6">
@@ -26,15 +29,15 @@ function Profile() {
           </div>
           <div className="bg-[#fff8dc] rounded-3xl p-5 text-center shadow-md">
             <p className="text-xs tracking-widest text-muted-foreground">WALLET BALANCE</p>
-            <p className="text-2xl font-extrabold mt-2">327.00 <span className="text-[#f5c518] text-sm">KSH</span></p>
+            <p className="text-2xl font-extrabold mt-2">{balance.toFixed(2)} <span className="text-[#f5c518] text-sm">KSH</span></p>
           </div>
         </div>
         <h2 className="text-2xl font-extrabold mt-6">Earnings Overview</h2>
         <div className="mt-3 bg-white rounded-3xl p-5 shadow-md grid grid-cols-2 gap-y-5">
-          <div><p className="text-xs tracking-widest text-muted-foreground">TOTAL REVENUE</p><p className="font-extrabold text-lg">327.00 KSH</p></div>
-          <div><p className="text-xs tracking-widest text-muted-foreground">REFERRAL EARNINGS</p><p className="font-extrabold text-lg">1.00 KSH</p></div>
-          <div><p className="text-xs tracking-widest text-muted-foreground">TASK/JOB</p><p className="font-extrabold text-lg">318.00 KSH</p></div>
-          <div><p className="text-xs tracking-widest text-muted-foreground">CDK WINS</p><p className="font-extrabold text-lg">0.00 KSH</p></div>
+          <div><p className="text-xs tracking-widest text-muted-foreground">TOTAL REVENUE</p><p className="font-extrabold text-lg">{balance.toFixed(2)} KSH</p></div>
+          <div><p className="text-xs tracking-widest text-muted-foreground">REFERRAL CODE</p><p className="font-extrabold text-lg tracking-wider">{data?.profile?.referral_code ?? "—"}</p></div>
+          <div><p className="text-xs tracking-widest text-muted-foreground">PHONE</p><p className="font-extrabold text-lg">{data?.profile?.phone ?? "—"}</p></div>
+          <div><p className="text-xs tracking-widest text-muted-foreground">MEMBER</p><p className="font-extrabold text-lg">{data?.profile?.created_at ? new Date(data.profile.created_at).toLocaleDateString() : "—"}</p></div>
         </div>
         <div className="mt-6 grid grid-cols-3 gap-3">
           <button className="bg-[#2563eb] text-white rounded-2xl py-4 font-bold">Recharge</button>
