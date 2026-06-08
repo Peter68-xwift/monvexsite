@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Shell } from "@/components/Shell";
 import { Wallet, HandCoins, Gem, Vault, Gift, Users, Megaphone, Info, Zap, Power, Bell, TrendingUp, ArrowUpRight } from "lucide-react";
+import { useMe } from "@/hooks/useMe";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,6 +28,16 @@ const tiles = [
 ];
 
 function Index() {
+  const { data } = useMe();
+  const navigate = useNavigate();
+  const profile = data?.profile;
+  const fullName = profile?.full_name || profile?.phone || "Member";
+  const initials = fullName.slice(0, 2).toUpperCase();
+  const balance = Number(profile?.balance ?? 0);
+  async function signOut() {
+    await supabase.auth.signOut();
+    navigate({ to: "/auth", replace: true });
+  }
   return (
     <Shell bg="bg-slate-50">
       {/* Header */}
@@ -35,17 +48,17 @@ function Index() {
 
         <div className="relative flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-2xl bg-white/15 backdrop-blur-md ring-1 ring-white/20 flex items-center justify-center text-lg font-bold">Jn</div>
+            <div className="h-12 w-12 rounded-2xl bg-white/15 backdrop-blur-md ring-1 ring-white/20 flex items-center justify-center text-lg font-bold">{initials}</div>
             <div>
               <p className="text-xs text-white/60">Welcome back</p>
-              <p className="text-base font-semibold">Hi, Jn 👋</p>
+              <p className="text-base font-semibold">Hi, {fullName.split(" ")[0]} 👋</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <button className="h-10 w-10 rounded-xl bg-white/10 backdrop-blur-md ring-1 ring-white/15 flex items-center justify-center">
               <Bell className="h-4 w-4" />
             </button>
-            <button className="h-10 w-10 rounded-xl bg-white/10 backdrop-blur-md ring-1 ring-white/15 flex items-center justify-center">
+            <button onClick={signOut} aria-label="Sign out" className="h-10 w-10 rounded-xl bg-white/10 backdrop-blur-md ring-1 ring-white/15 flex items-center justify-center">
               <Power className="h-4 w-4" />
             </button>
           </div>
@@ -60,7 +73,7 @@ function Index() {
             </span>
           </div>
           <p className="mt-2 text-4xl font-extrabold tracking-tight">
-            KES 327<span className="text-lg font-medium text-white/70">.00</span>
+            KES {Math.floor(balance).toLocaleString()}<span className="text-lg font-medium text-white/70">.{(balance % 1).toFixed(2).slice(2)}</span>
           </p>
           <div className="mt-4 grid grid-cols-2 gap-2">
             <Link to="/deposit" className="rounded-xl bg-white text-[#1e3a8a] font-semibold text-sm py-2.5 flex items-center justify-center gap-1.5 shadow-lg">
@@ -77,7 +90,7 @@ function Index() {
       <div className="px-4 -mt-20 grid grid-cols-2 gap-3 relative z-10">
         <div className="bg-white rounded-2xl p-4 shadow-sm ring-1 ring-black/5">
           <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Total Revenue</p>
-          <p className="text-xl font-bold text-slate-900 mt-1">KES 327</p>
+          <p className="text-xl font-bold text-slate-900 mt-1">KES {balance.toLocaleString()}</p>
           <div className="flex items-center gap-1 mt-1 text-emerald-600 text-xs font-medium">
             <ArrowUpRight className="h-3 w-3" /> +5.2%
           </div>
