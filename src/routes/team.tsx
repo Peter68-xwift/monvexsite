@@ -2,6 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Shell } from "@/components/Shell";
 import { Users, Link2, UserCheck, UserX, ArrowDownToLine, ArrowUpFromLine, Layers } from "lucide-react";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { getTeam } from "@/lib/monvex.functions";
+import { useMe } from "@/hooks/useMe";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/team")({
   head: () => ({ meta: [{ title: "Team — Monvex" }, { name: "description", content: "Affiliate team on Monvex." }] }),
@@ -9,17 +15,24 @@ export const Route = createFileRoute("/team")({
 });
 
 function Team() {
-  const link = "https://monvex-tech.site/register.php";
+  const { data: me } = useMe();
+  const navigate = useNavigate();
+  const teamFn = useServerFn(getTeam);
+  const { data: team } = useQuery({ queryKey: ["team"], queryFn: () => teamFn() });
+  const code = me?.profile?.referral_code ?? "";
+  const link = typeof window !== "undefined" ? `${window.location.origin}/auth?ref=${code}` : `/auth?ref=${code}`;
   const [copied, setCopied] = useState(false);
+  const s = team?.stats;
 
   const stats = [
-    { label: "Total Subordinates", value: "0", Icon: Users, tint: "bg-black", iconColor: "text-[#f5c518]" },
-    { label: "Active Subordinates", value: "0", Icon: UserCheck, tint: "bg-emerald-500", iconColor: "text-white" },
-    { label: "Inactive Subordinates", value: "0", Icon: UserX, tint: "bg-rose-500", iconColor: "text-white" },
-    { label: "Team Recharge", value: "KSH 0", Icon: ArrowDownToLine, tint: "bg-blue-600", iconColor: "text-white" },
-    { label: "Team Withdrawal", value: "KSH 0", Icon: ArrowUpFromLine, tint: "bg-orange-500", iconColor: "text-white" },
-    { label: "Active Packages", value: "0", Icon: Layers, tint: "bg-violet-600", iconColor: "text-white" },
+    { label: "Total Subordinates", value: String(s?.total ?? 0), Icon: Users, tint: "bg-black", iconColor: "text-[#f5c518]" },
+    { label: "Active Subordinates", value: String(s?.active ?? 0), Icon: UserCheck, tint: "bg-emerald-500", iconColor: "text-white" },
+    { label: "Inactive Subordinates", value: String(s?.inactive ?? 0), Icon: UserX, tint: "bg-rose-500", iconColor: "text-white" },
+    { label: "Team Recharge", value: `KSH ${(s?.recharge ?? 0).toLocaleString()}`, Icon: ArrowDownToLine, tint: "bg-blue-600", iconColor: "text-white" },
+    { label: "Team Withdrawal", value: `KSH ${(s?.withdrawal ?? 0).toLocaleString()}`, Icon: ArrowUpFromLine, tint: "bg-orange-500", iconColor: "text-white" },
+    { label: "Active Packages", value: String(s?.active_packages ?? 0), Icon: Layers, tint: "bg-violet-600", iconColor: "text-white" },
   ];
+  const members = team?.members ?? [];
 
   return (
     <Shell>
@@ -29,7 +42,7 @@ function Team() {
             <p className="text-xs tracking-widest text-black/60">NETWORK</p>
             <h1 className="text-3xl font-extrabold">Affiliate Team</h1>
           </div>
-          <button className="bg-black text-white px-5 py-2 rounded-full font-semibold text-sm">Logout</button>
+          <button onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/auth", replace: true }); }} className="bg-black text-white px-5 py-2 rounded-full font-semibold text-sm">Logout</button>
         </div>
 
         {/* Stats grid */}
@@ -63,7 +76,7 @@ function Team() {
         <div className="mt-6">
           <div className="flex justify-between items-center mb-3">
             <p className="font-extrabold tracking-widest">SUBORDINATES</p>
-            <span className="bg-white rounded-full px-4 py-1 text-xs font-bold">0 USERS</span>
+            <span className="bg-white rounded-full px-4 py-1 text-xs font-bold">{members.length} USERS</span>
           </div>
           <div className="bg-white rounded-3xl shadow-md overflow-hidden">
             <div className="grid grid-cols-4 gap-2 px-4 py-3 bg-black text-white text-[10px] uppercase tracking-wider font-bold">
@@ -72,9 +85,20 @@ function Team() {
               <div className="text-center">Status</div>
               <div className="text-right">Joined</div>
             </div>
-            <div className="py-10 text-center text-sm tracking-widest font-semibold text-muted-foreground">
-              NO SUBORDINATES YET
-            </div>
+            {members.length === 0 ? (
+              <div className="py-10 text-center text-sm tracking-widest font-semibold text-muted-foreground">NO SUBORDINATES YET</div>
+            ) : (
+              members.map((m) => (
+                <div key={m.id} className="grid grid-cols-4 gap-2 px-4 py-3 text-xs border-t border-black/5">
+                  <div className="font-semibold truncate">{m.phone}</div>
+                  <div>{m.package_code ?? "—"}</div>
+                  <div className="text-center">
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${m.active ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"}`}>{m.active ? "Active" : "Inactive"}</span>
+                  </div>
+                  <div className="text-right text-muted-foreground">{new Date(m.created_at).toLocaleDateString()}</div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
