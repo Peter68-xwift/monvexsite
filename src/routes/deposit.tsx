@@ -2,6 +2,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Shell } from "@/components/Shell";
 import { ArrowLeft, Smartphone, ShieldCheck, Loader2, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { createDeposit } from "@/lib/monvex.functions";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/deposit")({
   head: () => ({
@@ -17,6 +20,8 @@ type Step = "form" | "prompt" | "success";
 
 function DepositPage() {
   const navigate = useNavigate();
+  const deposit = useServerFn(createDeposit);
+  const qc = useQueryClient();
   const [step, setStep] = useState<Step>("form");
   const [phone, setPhone] = useState("");
   const [amount, setAmount] = useState("");
@@ -29,7 +34,7 @@ function DepositPage() {
     return /^(?:254|0)?(?:7|1)\d{8}$/.test(n);
   };
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     if (!isValidPhone(phone)) {
@@ -42,8 +47,16 @@ function DepositPage() {
       return;
     }
     setStep("prompt");
-    // Simulated STK push wait
-    setTimeout(() => setStep("success"), 4000);
+    try {
+      await deposit({ data: { mpesa_number: phone, amount: amt } });
+      qc.invalidateQueries({ queryKey: ["me"] });
+      qc.invalidateQueries({ queryKey: ["transactions"] });
+      // simulated PIN entry delay
+      setTimeout(() => setStep("success"), 2500);
+    } catch (err: any) {
+      setError(err.message || "Deposit failed");
+      setStep("form");
+    }
   };
 
   return (

@@ -2,6 +2,10 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Shell } from "@/components/Shell";
 import { ArrowLeft, Smartphone, Loader2, CheckCircle2, Wallet } from "lucide-react";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { createWithdrawal } from "@/lib/monvex.functions";
+import { useMe } from "@/hooks/useMe";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/withdraw")({
   head: () => ({
@@ -13,13 +17,16 @@ export const Route = createFileRoute("/withdraw")({
   component: WithdrawPage,
 });
 
-const BALANCE = 327;
 const MIN = 100;
 
 type Step = "form" | "processing" | "success";
 
 function WithdrawPage() {
   const navigate = useNavigate();
+  const { data: me } = useMe();
+  const BALANCE = Number(me?.profile?.balance ?? 0);
+  const withdraw = useServerFn(createWithdrawal);
+  const qc = useQueryClient();
   const [step, setStep] = useState<Step>("form");
   const [phone, setPhone] = useState("");
   const [amount, setAmount] = useState("");
@@ -27,7 +34,7 @@ function WithdrawPage() {
 
   const isValidPhone = (p: string) => /^(?:254|0)?(?:7|1)\d{8}$/.test(p.replace(/\D/g, ""));
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     if (!isValidPhone(phone)) {
@@ -44,7 +51,15 @@ function WithdrawPage() {
       return;
     }
     setStep("processing");
-    setTimeout(() => setStep("success"), 2500);
+    try {
+      await withdraw({ data: { mpesa_number: phone, amount: amt } });
+      qc.invalidateQueries({ queryKey: ["me"] });
+      qc.invalidateQueries({ queryKey: ["transactions"] });
+      setTimeout(() => setStep("success"), 1800);
+    } catch (err: any) {
+      setError(err.message || "Withdrawal failed");
+      setStep("form");
+    }
   };
 
   return (
