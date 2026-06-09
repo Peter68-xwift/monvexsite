@@ -82,20 +82,58 @@ export const createDeposit = createServerFn({ method: "POST" })
     amount: z.number().min(10).max(150000),
   }).parse(d))
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
-    // Simulated: insert as success immediately and credit balance
-    const { data: profile } = await supabase.from("profiles").select("balance").eq("id", userId).maybeSingle();
-    if (!profile) throw new Error("Profile missing");
-    const newBal = Number(profile.balance) + data.amount;
-    const { error: txe } = await supabase.from("transactions").insert({
-      user_id: userId, type: "deposit", amount: data.amount, status: "success",
-      mpesa_number: data.mpesa_number, description: "M-Pesa deposit",
-      reference: "SIM" + Math.random().toString(36).slice(2,10).toUpperCase(),
+    const { userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { stkPush, normalizeMsisdn } = await import("./mpesa.server");
+
+    const phone = normalizeMsisdn(data.mpesa_number);
+    if (!/^254(7|1)\d{8}$/.test(phone)) throw new Error("Invalid Safaricom number");
+
+    // Build callback URL from the inbound request origin
+    const { getRequestHeader } = await import("@tanstack/react-start/server");
+    const host = getRequestHeader("x-forwarded-host") || getRequestHeader("host");
+    const proto = getRequestHeader("x-forwarded-proto") || "https";
+    const callbackUrl =
+      process.env.MPESA_CALLBACK_URL || `${proto}://${host}/api/public/mpesa/callback`;
+
+    const stk = await stkPush({
+      phone,
+      amount: data.amount,
+      accountReference: "MONVEX",
+      description: "Deposit",
+      callbackUrl,
+    });
+
+    const { error: txe } = await supabaseAdmin.from("transactions").insert({
+      user_id: userId,
+      type: "deposit",
+      amount: data.amount,
+      status: "pending",
+      mpesa_number: phone,
+      description: "M-Pesa STK Push",
+      checkout_request_id: stk.CheckoutRequestID,
+      merchant_request_id: stk.MerchantRequestID,
     });
     if (txe) throw txe;
-    const { error: be } = await supabase.from("profiles").update({ balance: newBal }).eq("id", userId);
-    if (be) throw be;
-    return { ok: true, balance: newBal };
+
+    return {
+      ok: true,
+      checkout_request_id: stk.CheckoutRequestID,
+      message: stk.CustomerMessage,
+    };
+  });
+
+export const getDepositStatus = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ checkout_request_id: z.string().min(1) }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: tx } = await context.supabase
+      .from("transactions")
+      .select("status, amount, mpesa_receipt, description")
+      .eq("checkout_request_id", data.checkout_request_id)
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    return { tx: tx ?? null };
   });
 
 // ---- Withdrawal ----

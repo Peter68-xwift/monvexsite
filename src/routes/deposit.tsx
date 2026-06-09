@@ -3,7 +3,7 @@ import { Shell } from "@/components/Shell";
 import { ArrowLeft, Smartphone, ShieldCheck, Loader2, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { createDeposit } from "@/lib/monvex.functions";
+import { createDeposit, getDepositStatus } from "@/lib/monvex.functions";
 import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/deposit")({
@@ -21,6 +21,7 @@ type Step = "form" | "prompt" | "success";
 function DepositPage() {
   const navigate = useNavigate();
   const deposit = useServerFn(createDeposit);
+  const checkStatus = useServerFn(getDepositStatus);
   const qc = useQueryClient();
   const [step, setStep] = useState<Step>("form");
   const [phone, setPhone] = useState("");
@@ -48,11 +49,35 @@ function DepositPage() {
     }
     setStep("prompt");
     try {
-      await deposit({ data: { mpesa_number: phone, amount: amt } });
-      qc.invalidateQueries({ queryKey: ["me"] });
-      qc.invalidateQueries({ queryKey: ["transactions"] });
-      // simulated PIN entry delay
-      setTimeout(() => setStep("success"), 2500);
+      const res = await deposit({ data: { mpesa_number: phone, amount: amt } });
+      const checkoutId = res.checkout_request_id;
+      // Poll for confirmation up to ~90s
+      const started = Date.now();
+      const poll = async () => {
+        try {
+          const { tx } = await checkStatus({ data: { checkout_request_id: checkoutId } });
+          if (tx?.status === "success") {
+            qc.invalidateQueries({ queryKey: ["me"] });
+            qc.invalidateQueries({ queryKey: ["transactions"] });
+            setStep("success");
+            return;
+          }
+          if (tx?.status === "failed") {
+            setError(tx.description || "Payment was cancelled or failed");
+            setStep("form");
+            return;
+          }
+          if (Date.now() - started > 90_000) {
+            setError("Timed out waiting for confirmation. If you paid, it will reflect shortly.");
+            setStep("form");
+            return;
+          }
+          setTimeout(poll, 3000);
+        } catch {
+          setTimeout(poll, 4000);
+        }
+      };
+      setTimeout(poll, 4000);
     } catch (err: any) {
       setError(err.message || "Deposit failed");
       setStep("form");
