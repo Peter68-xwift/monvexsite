@@ -123,6 +123,19 @@ export const createDeposit = createServerFn({ method: "POST" })
     };
   });
 
+export const getDepositStatus = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ checkout_request_id: z.string().min(1) }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: tx } = await context.supabase
+      .from("transactions")
+      .select("status, amount, mpesa_receipt, description")
+      .eq("checkout_request_id", data.checkout_request_id)
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    return { tx: tx ?? null };
+  });
+
 // ---- Withdrawal ----
 export const createWithdrawal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
