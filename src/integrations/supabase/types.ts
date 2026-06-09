@@ -91,11 +91,14 @@ export type Database = {
       transactions: {
         Row: {
           amount: number
+          checkout_request_id: string | null
           created_at: string
           description: string | null
           id: string
+          merchant_request_id: string | null
           meta: Json
           mpesa_number: string | null
+          mpesa_receipt: string | null
           reference: string | null
           status: Database["public"]["Enums"]["tx_status"]
           type: Database["public"]["Enums"]["tx_type"]
@@ -104,11 +107,14 @@ export type Database = {
         }
         Insert: {
           amount: number
+          checkout_request_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
+          merchant_request_id?: string | null
           meta?: Json
           mpesa_number?: string | null
+          mpesa_receipt?: string | null
           reference?: string | null
           status?: Database["public"]["Enums"]["tx_status"]
           type: Database["public"]["Enums"]["tx_type"]
@@ -117,11 +123,14 @@ export type Database = {
         }
         Update: {
           amount?: number
+          checkout_request_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
+          merchant_request_id?: string | null
           meta?: Json
           mpesa_number?: string | null
+          mpesa_receipt?: string | null
           reference?: string | null
           status?: Database["public"]["Enums"]["tx_status"]
           type?: Database["public"]["Enums"]["tx_type"]
