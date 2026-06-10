@@ -145,8 +145,12 @@ export const createWithdrawal = createServerFn({ method: "POST" })
   }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const { data: profile } = await supabase.from("profiles").select("balance").eq("id", userId).maybeSingle();
+    const { data: settings } = await supabase.from("site_settings").select("withdrawals_enabled, min_withdrawal").eq("id", 1).maybeSingle();
+    if (settings && settings.withdrawals_enabled === false) throw new Error("Withdrawals are currently suspended");
+    if (settings && data.amount < Number(settings.min_withdrawal)) throw new Error(`Minimum withdrawal is KES ${settings.min_withdrawal}`);
+    const { data: profile } = await supabase.from("profiles").select("balance, withdrawal_enabled").eq("id", userId).maybeSingle();
     if (!profile) throw new Error("Profile missing");
+    if ((profile as any).withdrawal_enabled === false) throw new Error("Your withdrawal access is disabled. Contact support.");
     if (Number(profile.balance) < data.amount) throw new Error("Insufficient balance");
     // Reserve funds and create pending withdrawal (admin to approve)
     const { error: txe } = await supabase.from("transactions").insert({
