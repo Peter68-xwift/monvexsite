@@ -20,7 +20,14 @@ import { Route as DownloadRouteImport } from './routes/download'
 import { Route as DepositRouteImport } from './routes/deposit'
 import { Route as CompanyRouteImport } from './routes/company'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminWalletRouteImport } from './routes/admin.wallet'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
+import { Route as AdminPackagesRouteImport } from './routes/admin.packages'
 import { Route as ApiPublicMpesaCallbackRouteImport } from './routes/api/public/mpesa.callback'
 
 const WithdrawRoute = WithdrawRouteImport.update({
@@ -78,10 +85,45 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminWalletRoute = AdminWalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPaymentsRoute = AdminPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPackagesRoute = AdminPackagesRouteImport.update({
+  id: '/packages',
+  path: '/packages',
+  getParentRoute: () => AdminRoute,
 } as any)
 const ApiPublicMpesaCallbackRoute = ApiPublicMpesaCallbackRouteImport.update({
   id: '/api/public/mpesa/callback',
@@ -91,6 +133,7 @@ const ApiPublicMpesaCallbackRoute = ApiPublicMpesaCallbackRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/company': typeof CompanyRoute
   '/deposit': typeof DepositRoute
@@ -102,6 +145,12 @@ export interface FileRoutesByFullPath {
   '/tasks': typeof TasksRoute
   '/team': typeof TeamRoute
   '/withdraw': typeof WithdrawRoute
+  '/admin/packages': typeof AdminPackagesRoute
+  '/admin/payments': typeof AdminPaymentsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/wallet': typeof AdminWalletRoute
+  '/admin/': typeof AdminIndexRoute
   '/api/public/mpesa/callback': typeof ApiPublicMpesaCallbackRoute
 }
 export interface FileRoutesByTo {
@@ -117,11 +166,18 @@ export interface FileRoutesByTo {
   '/tasks': typeof TasksRoute
   '/team': typeof TeamRoute
   '/withdraw': typeof WithdrawRoute
+  '/admin/packages': typeof AdminPackagesRoute
+  '/admin/payments': typeof AdminPaymentsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/wallet': typeof AdminWalletRoute
+  '/admin': typeof AdminIndexRoute
   '/api/public/mpesa/callback': typeof ApiPublicMpesaCallbackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/company': typeof CompanyRoute
   '/deposit': typeof DepositRoute
@@ -133,12 +189,19 @@ export interface FileRoutesById {
   '/tasks': typeof TasksRoute
   '/team': typeof TeamRoute
   '/withdraw': typeof WithdrawRoute
+  '/admin/packages': typeof AdminPackagesRoute
+  '/admin/payments': typeof AdminPaymentsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/wallet': typeof AdminWalletRoute
+  '/admin/': typeof AdminIndexRoute
   '/api/public/mpesa/callback': typeof ApiPublicMpesaCallbackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/auth'
     | '/company'
     | '/deposit'
@@ -150,6 +213,12 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/team'
     | '/withdraw'
+    | '/admin/packages'
+    | '/admin/payments'
+    | '/admin/settings'
+    | '/admin/users'
+    | '/admin/wallet'
+    | '/admin/'
     | '/api/public/mpesa/callback'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -165,10 +234,17 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/team'
     | '/withdraw'
+    | '/admin/packages'
+    | '/admin/payments'
+    | '/admin/settings'
+    | '/admin/users'
+    | '/admin/wallet'
+    | '/admin'
     | '/api/public/mpesa/callback'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/auth'
     | '/company'
     | '/deposit'
@@ -180,11 +256,18 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/team'
     | '/withdraw'
+    | '/admin/packages'
+    | '/admin/payments'
+    | '/admin/settings'
+    | '/admin/users'
+    | '/admin/wallet'
+    | '/admin/'
     | '/api/public/mpesa/callback'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
   CompanyRoute: typeof CompanyRoute
   DepositRoute: typeof DepositRoute
@@ -278,12 +361,61 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/wallet': {
+      id: '/admin/wallet'
+      path: '/wallet'
+      fullPath: '/admin/wallet'
+      preLoaderRoute: typeof AdminWalletRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/payments': {
+      id: '/admin/payments'
+      path: '/payments'
+      fullPath: '/admin/payments'
+      preLoaderRoute: typeof AdminPaymentsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/packages': {
+      id: '/admin/packages'
+      path: '/packages'
+      fullPath: '/admin/packages'
+      preLoaderRoute: typeof AdminPackagesRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/api/public/mpesa/callback': {
       id: '/api/public/mpesa/callback'
@@ -295,8 +427,29 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminPackagesRoute: typeof AdminPackagesRoute
+  AdminPaymentsRoute: typeof AdminPaymentsRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  AdminWalletRoute: typeof AdminWalletRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminPackagesRoute: AdminPackagesRoute,
+  AdminPaymentsRoute: AdminPaymentsRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  AdminWalletRoute: AdminWalletRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
   CompanyRoute: CompanyRoute,
   DepositRoute: DepositRoute,

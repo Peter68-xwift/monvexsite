@@ -55,6 +55,7 @@ export type Database = {
           referral_code: string
           referred_by: string | null
           updated_at: string
+          withdrawal_enabled: boolean
         }
         Insert: {
           balance?: number
@@ -66,6 +67,7 @@ export type Database = {
           referral_code: string
           referred_by?: string | null
           updated_at?: string
+          withdrawal_enabled?: boolean
         }
         Update: {
           balance?: number
@@ -77,6 +79,7 @@ export type Database = {
           referral_code?: string
           referred_by?: string | null
           updated_at?: string
+          withdrawal_enabled?: boolean
         }
         Relationships: [
           {
@@ -87,6 +90,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      site_settings: {
+        Row: {
+          id: number
+          maintenance_mode: boolean
+          min_deposit: number
+          min_withdrawal: number
+          registrations_enabled: boolean
+          tasks_enabled: boolean
+          updated_at: string
+          withdrawals_enabled: boolean
+        }
+        Insert: {
+          id?: number
+          maintenance_mode?: boolean
+          min_deposit?: number
+          min_withdrawal?: number
+          registrations_enabled?: boolean
+          tasks_enabled?: boolean
+          updated_at?: string
+          withdrawals_enabled?: boolean
+        }
+        Update: {
+          id?: number
+          maintenance_mode?: boolean
+          min_deposit?: number
+          min_withdrawal?: number
+          registrations_enabled?: boolean
+          tasks_enabled?: boolean
+          updated_at?: string
+          withdrawals_enabled?: boolean
+        }
+        Relationships: []
       }
       transactions: {
         Row: {

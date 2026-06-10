@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { Shell } from "@/components/Shell";
-import { Monitor, MessageCircle, ShieldCheck, Smartphone } from "lucide-react";
+import { Monitor, MessageCircle, ShieldCheck, Smartphone, Shield } from "lucide-react";
 import { useMe } from "@/hooks/useMe";
 
 export const Route = createFileRoute("/profile")({
@@ -19,6 +19,7 @@ const links = [
 function Profile() {
   const { data } = useMe();
   const balance = Number(data?.profile?.balance ?? 0);
+  const isAdmin = data?.roles?.includes("admin");
   return (
     <Shell>
       <div className="px-4 pt-6">
@@ -51,6 +52,12 @@ function Profile() {
               <p className="font-bold">{label}</p>
             </Link>
           ))}
+          {isAdmin && (
+            <Link to="/admin" className="flex items-center gap-4 px-5 py-4">
+              <Shield className="h-6 w-6 text-emerald-600" />
+              <p className="font-bold">Admin Panel</p>
+            </Link>
+          )}
         </div>
       </div>
     </Shell>
