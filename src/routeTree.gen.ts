@@ -10,12 +10,15 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WithdrawRouteImport } from './routes/withdraw'
+import { Route as WealthRouteImport } from './routes/wealth'
 import { Route as TeamRouteImport } from './routes/team'
 import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as SecurityRouteImport } from './routes/security'
 import { Route as RecordsRouteImport } from './routes/records'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PackagesRouteImport } from './routes/packages'
+import { Route as NewsRouteImport } from './routes/news'
+import { Route as GiftRouteImport } from './routes/gift'
 import { Route as DownloadRouteImport } from './routes/download'
 import { Route as DepositRouteImport } from './routes/deposit'
 import { Route as CompanyRouteImport } from './routes/company'
@@ -33,6 +36,11 @@ import { Route as ApiPublicMpesaCallbackRouteImport } from './routes/api/public/
 const WithdrawRoute = WithdrawRouteImport.update({
   id: '/withdraw',
   path: '/withdraw',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WealthRoute = WealthRouteImport.update({
+  id: '/wealth',
+  path: '/wealth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TeamRoute = TeamRouteImport.update({
@@ -63,6 +71,16 @@ const ProfileRoute = ProfileRouteImport.update({
 const PackagesRoute = PackagesRouteImport.update({
   id: '/packages',
   path: '/packages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsRoute = NewsRouteImport.update({
+  id: '/news',
+  path: '/news',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GiftRoute = GiftRouteImport.update({
+  id: '/gift',
+  path: '/gift',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DownloadRoute = DownloadRouteImport.update({
@@ -138,12 +156,15 @@ export interface FileRoutesByFullPath {
   '/company': typeof CompanyRoute
   '/deposit': typeof DepositRoute
   '/download': typeof DownloadRoute
+  '/gift': typeof GiftRoute
+  '/news': typeof NewsRoute
   '/packages': typeof PackagesRoute
   '/profile': typeof ProfileRoute
   '/records': typeof RecordsRoute
   '/security': typeof SecurityRoute
   '/tasks': typeof TasksRoute
   '/team': typeof TeamRoute
+  '/wealth': typeof WealthRoute
   '/withdraw': typeof WithdrawRoute
   '/admin/packages': typeof AdminPackagesRoute
   '/admin/payments': typeof AdminPaymentsRoute
@@ -159,12 +180,15 @@ export interface FileRoutesByTo {
   '/company': typeof CompanyRoute
   '/deposit': typeof DepositRoute
   '/download': typeof DownloadRoute
+  '/gift': typeof GiftRoute
+  '/news': typeof NewsRoute
   '/packages': typeof PackagesRoute
   '/profile': typeof ProfileRoute
   '/records': typeof RecordsRoute
   '/security': typeof SecurityRoute
   '/tasks': typeof TasksRoute
   '/team': typeof TeamRoute
+  '/wealth': typeof WealthRoute
   '/withdraw': typeof WithdrawRoute
   '/admin/packages': typeof AdminPackagesRoute
   '/admin/payments': typeof AdminPaymentsRoute
@@ -182,12 +206,15 @@ export interface FileRoutesById {
   '/company': typeof CompanyRoute
   '/deposit': typeof DepositRoute
   '/download': typeof DownloadRoute
+  '/gift': typeof GiftRoute
+  '/news': typeof NewsRoute
   '/packages': typeof PackagesRoute
   '/profile': typeof ProfileRoute
   '/records': typeof RecordsRoute
   '/security': typeof SecurityRoute
   '/tasks': typeof TasksRoute
   '/team': typeof TeamRoute
+  '/wealth': typeof WealthRoute
   '/withdraw': typeof WithdrawRoute
   '/admin/packages': typeof AdminPackagesRoute
   '/admin/payments': typeof AdminPaymentsRoute
@@ -206,12 +233,15 @@ export interface FileRouteTypes {
     | '/company'
     | '/deposit'
     | '/download'
+    | '/gift'
+    | '/news'
     | '/packages'
     | '/profile'
     | '/records'
     | '/security'
     | '/tasks'
     | '/team'
+    | '/wealth'
     | '/withdraw'
     | '/admin/packages'
     | '/admin/payments'
@@ -227,12 +257,15 @@ export interface FileRouteTypes {
     | '/company'
     | '/deposit'
     | '/download'
+    | '/gift'
+    | '/news'
     | '/packages'
     | '/profile'
     | '/records'
     | '/security'
     | '/tasks'
     | '/team'
+    | '/wealth'
     | '/withdraw'
     | '/admin/packages'
     | '/admin/payments'
@@ -249,12 +282,15 @@ export interface FileRouteTypes {
     | '/company'
     | '/deposit'
     | '/download'
+    | '/gift'
+    | '/news'
     | '/packages'
     | '/profile'
     | '/records'
     | '/security'
     | '/tasks'
     | '/team'
+    | '/wealth'
     | '/withdraw'
     | '/admin/packages'
     | '/admin/payments'
@@ -272,12 +308,15 @@ export interface RootRouteChildren {
   CompanyRoute: typeof CompanyRoute
   DepositRoute: typeof DepositRoute
   DownloadRoute: typeof DownloadRoute
+  GiftRoute: typeof GiftRoute
+  NewsRoute: typeof NewsRoute
   PackagesRoute: typeof PackagesRoute
   ProfileRoute: typeof ProfileRoute
   RecordsRoute: typeof RecordsRoute
   SecurityRoute: typeof SecurityRoute
   TasksRoute: typeof TasksRoute
   TeamRoute: typeof TeamRoute
+  WealthRoute: typeof WealthRoute
   WithdrawRoute: typeof WithdrawRoute
   ApiPublicMpesaCallbackRoute: typeof ApiPublicMpesaCallbackRoute
 }
@@ -289,6 +328,13 @@ declare module '@tanstack/react-router' {
       path: '/withdraw'
       fullPath: '/withdraw'
       preLoaderRoute: typeof WithdrawRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/wealth': {
+      id: '/wealth'
+      path: '/wealth'
+      fullPath: '/wealth'
+      preLoaderRoute: typeof WealthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/team': {
@@ -331,6 +377,20 @@ declare module '@tanstack/react-router' {
       path: '/packages'
       fullPath: '/packages'
       preLoaderRoute: typeof PackagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/news': {
+      id: '/news'
+      path: '/news'
+      fullPath: '/news'
+      preLoaderRoute: typeof NewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gift': {
+      id: '/gift'
+      path: '/gift'
+      fullPath: '/gift'
+      preLoaderRoute: typeof GiftRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/download': {
@@ -454,15 +514,28 @@ const rootRouteChildren: RootRouteChildren = {
   CompanyRoute: CompanyRoute,
   DepositRoute: DepositRoute,
   DownloadRoute: DownloadRoute,
+  GiftRoute: GiftRoute,
+  NewsRoute: NewsRoute,
   PackagesRoute: PackagesRoute,
   ProfileRoute: ProfileRoute,
   RecordsRoute: RecordsRoute,
   SecurityRoute: SecurityRoute,
   TasksRoute: TasksRoute,
   TeamRoute: TeamRoute,
+  WealthRoute: WealthRoute,
   WithdrawRoute: WithdrawRoute,
   ApiPublicMpesaCallbackRoute: ApiPublicMpesaCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
