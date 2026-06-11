@@ -36,7 +36,7 @@ export const listNews = createServerFn({ method: "GET" })
       .eq("published", true)
       .order("created_at", { ascending: false })
       .limit(50);
-    return { posts: (data ?? []) as Array<{ id: string; title: string; body: string; cover_url: string | null; created_at: string }> };
+    return { posts: (data ?? []) as unknown as Array<{ id: string; title: string; body: string; cover_url: string | null; created_at: string }> };
   });
 
 // ---- Gift code redemption ----
