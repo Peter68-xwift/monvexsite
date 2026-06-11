@@ -52,7 +52,7 @@ export const Route = createFileRoute("/api/public/mpesa/callback")({
 
           const { data: profile } = await supabaseAdmin
             .from("profiles")
-            .select("balance")
+            .select("balance, referred_by")
             .eq("id", tx.user_id)
             .maybeSingle();
 
@@ -61,6 +61,21 @@ export const Route = createFileRoute("/api/public/mpesa/callback")({
               .from("profiles")
               .update({ balance: Number(profile.balance) + amount })
               .eq("id", tx.user_id);
+            // 10% referral rebate to the user's upline (if any)
+            const referrerId = (profile as any).referred_by as string | null;
+            if (referrerId) {
+              const rebate = Math.round(amount * 0.10 * 100) / 100;
+              const { data: r } = await supabaseAdmin
+                .from("profiles").select("balance").eq("id", referrerId).maybeSingle();
+              if (r) {
+                await supabaseAdmin.from("profiles")
+                  .update({ balance: Number(r.balance) + rebate }).eq("id", referrerId);
+                await supabaseAdmin.from("transactions").insert({
+                  user_id: referrerId, type: "rebate", amount: rebate,
+                  status: "success", description: "Rebate from downline deposit",
+                });
+              }
+            }
           }
         } else {
           await supabaseAdmin
