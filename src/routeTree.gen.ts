@@ -31,6 +31,9 @@ import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
 import { Route as AdminPackagesRouteImport } from './routes/admin.packages'
+import { Route as AdminNewsRouteImport } from './routes/admin.news'
+import { Route as AdminGiftCodesRouteImport } from './routes/admin.gift-codes'
+import { Route as AdminDepositsRouteImport } from './routes/admin.deposits'
 import { Route as ApiPublicMpesaCallbackRouteImport } from './routes/api/public/mpesa.callback'
 
 const WithdrawRoute = WithdrawRouteImport.update({
@@ -143,6 +146,21 @@ const AdminPackagesRoute = AdminPackagesRouteImport.update({
   path: '/packages',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminNewsRoute = AdminNewsRouteImport.update({
+  id: '/news',
+  path: '/news',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminGiftCodesRoute = AdminGiftCodesRouteImport.update({
+  id: '/gift-codes',
+  path: '/gift-codes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDepositsRoute = AdminDepositsRouteImport.update({
+  id: '/deposits',
+  path: '/deposits',
+  getParentRoute: () => AdminRoute,
+} as any)
 const ApiPublicMpesaCallbackRoute = ApiPublicMpesaCallbackRouteImport.update({
   id: '/api/public/mpesa/callback',
   path: '/api/public/mpesa/callback',
@@ -166,6 +184,9 @@ export interface FileRoutesByFullPath {
   '/team': typeof TeamRoute
   '/wealth': typeof WealthRoute
   '/withdraw': typeof WithdrawRoute
+  '/admin/deposits': typeof AdminDepositsRoute
+  '/admin/gift-codes': typeof AdminGiftCodesRoute
+  '/admin/news': typeof AdminNewsRoute
   '/admin/packages': typeof AdminPackagesRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -190,6 +211,9 @@ export interface FileRoutesByTo {
   '/team': typeof TeamRoute
   '/wealth': typeof WealthRoute
   '/withdraw': typeof WithdrawRoute
+  '/admin/deposits': typeof AdminDepositsRoute
+  '/admin/gift-codes': typeof AdminGiftCodesRoute
+  '/admin/news': typeof AdminNewsRoute
   '/admin/packages': typeof AdminPackagesRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -216,6 +240,9 @@ export interface FileRoutesById {
   '/team': typeof TeamRoute
   '/wealth': typeof WealthRoute
   '/withdraw': typeof WithdrawRoute
+  '/admin/deposits': typeof AdminDepositsRoute
+  '/admin/gift-codes': typeof AdminGiftCodesRoute
+  '/admin/news': typeof AdminNewsRoute
   '/admin/packages': typeof AdminPackagesRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -243,6 +270,9 @@ export interface FileRouteTypes {
     | '/team'
     | '/wealth'
     | '/withdraw'
+    | '/admin/deposits'
+    | '/admin/gift-codes'
+    | '/admin/news'
     | '/admin/packages'
     | '/admin/payments'
     | '/admin/settings'
@@ -267,6 +297,9 @@ export interface FileRouteTypes {
     | '/team'
     | '/wealth'
     | '/withdraw'
+    | '/admin/deposits'
+    | '/admin/gift-codes'
+    | '/admin/news'
     | '/admin/packages'
     | '/admin/payments'
     | '/admin/settings'
@@ -292,6 +325,9 @@ export interface FileRouteTypes {
     | '/team'
     | '/wealth'
     | '/withdraw'
+    | '/admin/deposits'
+    | '/admin/gift-codes'
+    | '/admin/news'
     | '/admin/packages'
     | '/admin/payments'
     | '/admin/settings'
@@ -477,6 +513,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPackagesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/news': {
+      id: '/admin/news'
+      path: '/news'
+      fullPath: '/admin/news'
+      preLoaderRoute: typeof AdminNewsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/gift-codes': {
+      id: '/admin/gift-codes'
+      path: '/gift-codes'
+      fullPath: '/admin/gift-codes'
+      preLoaderRoute: typeof AdminGiftCodesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/deposits': {
+      id: '/admin/deposits'
+      path: '/deposits'
+      fullPath: '/admin/deposits'
+      preLoaderRoute: typeof AdminDepositsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/api/public/mpesa/callback': {
       id: '/api/public/mpesa/callback'
       path: '/api/public/mpesa/callback'
@@ -488,6 +545,9 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminDepositsRoute: typeof AdminDepositsRoute
+  AdminGiftCodesRoute: typeof AdminGiftCodesRoute
+  AdminNewsRoute: typeof AdminNewsRoute
   AdminPackagesRoute: typeof AdminPackagesRoute
   AdminPaymentsRoute: typeof AdminPaymentsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
@@ -497,6 +557,9 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminDepositsRoute: AdminDepositsRoute,
+  AdminGiftCodesRoute: AdminGiftCodesRoute,
+  AdminNewsRoute: AdminNewsRoute,
   AdminPackagesRoute: AdminPackagesRoute,
   AdminPaymentsRoute: AdminPaymentsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
