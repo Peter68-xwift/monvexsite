@@ -108,7 +108,7 @@ export const purchasePackage = createServerFn({ method: "POST" })
     const { data: plan, error: pe } = await supabase
       .from("packages_catalog").select("*").eq("code", data.code).maybeSingle();
     if (pe || !plan) throw new Error("Plan not found");
-    const { data: profile } = await supabase.from("profiles").select("balance").eq("id", userId).maybeSingle();
+    const { data: profile } = await supabase.from("profiles").select("balance, referred_by").eq("id", userId).maybeSingle();
     if (!profile) throw new Error("Profile missing");
     if (Number(profile.balance) < Number(plan.deposit)) throw new Error("Insufficient balance — please deposit first");
 
@@ -124,6 +124,76 @@ export const purchasePackage = createServerFn({ method: "POST" })
       user_id: userId, type: "deposit", amount: -Number(plan.deposit),
       status: "success", description: `Purchased ${plan.name}`, reference: plan.code,
     });
+    // 10% referral rebate to upline on package purchase
+    if ((profile as any).referred_by) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await creditReferralRebate(supabaseAdmin, (profile as any).referred_by, Number(plan.deposit), `Rebate from ${plan.code} purchase`);
+    }
+    return { ok: true };
+  });
+
+async function creditReferralRebate(supabaseAdmin: any, referrerId: string, baseAmount: number, note: string) {
+  const rebate = Math.round(baseAmount * 0.10 * 100) / 100;
+  if (rebate <= 0) return;
+  const { data: r } = await supabaseAdmin.from("profiles").select("balance").eq("id", referrerId).maybeSingle();
+  if (!r) return;
+  await supabaseAdmin.from("profiles").update({ balance: Number(r.balance) + rebate }).eq("id", referrerId);
+  await supabaseAdmin.from("transactions").insert({
+    user_id: referrerId, type: "rebate", amount: rebate, status: "success", description: note,
+  });
+}
+
+// ---- Daily task claim (one per day, sums active package daily_income) ----
+export const claimDailyIncome = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const today = new Date().toISOString().slice(0, 10);
+    const { data: pkgs } = await supabase
+      .from("user_packages")
+      .select("id, last_claimed_at, packages_catalog(daily_income)")
+      .eq("user_id", userId)
+      .eq("status", "active");
+    const eligible = (pkgs ?? []).filter((p: any) => p.last_claimed_at !== today);
+    if (!eligible.length) {
+      if (!pkgs?.length) throw new Error("You need to purchase a package first");
+      throw new Error("You have already claimed today. Come back tomorrow.");
+    }
+    let total = 0;
+    for (const p of eligible) {
+      total += Number((p as any).packages_catalog?.daily_income ?? 0);
+    }
+    if (total <= 0) throw new Error("Nothing to claim today");
+    const ids = eligible.map((p: any) => p.id);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("user_packages").update({ last_claimed_at: today }).in("id", ids);
+    const { data: pr } = await supabaseAdmin.from("profiles").select("balance").eq("id", userId).maybeSingle();
+    await supabaseAdmin.from("profiles").update({ balance: Number(pr?.balance ?? 0) + total }).eq("id", userId);
+    await supabaseAdmin.from("transactions").insert({
+      user_id: userId, type: "rebate", amount: total, status: "success", description: "Daily task claim",
+    });
+    return { ok: true, amount: total };
+  });
+
+// ---- Manual deposit (user pastes mpesa SMS, admin approves) ----
+export const createManualDeposit = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({
+    amount: z.number().min(10).max(1000000),
+    mpesa_message: z.string().trim().min(10).max(1000),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("transactions").insert({
+      user_id: context.userId,
+      type: "deposit",
+      amount: data.amount,
+      status: "pending",
+      method: "manual",
+      mpesa_message: data.mpesa_message,
+      description: "Manual M-Pesa deposit (awaiting admin approval)",
+    } as any);
+    if (error) throw error;
     return { ok: true };
   });
 
