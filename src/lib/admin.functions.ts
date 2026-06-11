@@ -265,6 +265,11 @@ export const adminUpdateSettings = createServerFn({ method: "POST" })
       maintenance_mode: z.boolean().optional(),
       min_deposit: z.number().min(1).max(100000).optional(),
       min_withdrawal: z.number().min(1).max(1000000).optional(),
+      payment_paybill: z.string().max(40).optional(),
+      payment_account: z.string().max(60).optional(),
+      payment_instructions: z.string().max(2000).optional(),
+      whatsapp_url: z.string().max(500).optional(),
+      telegram_url: z.string().max(500).optional(),
     }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -285,5 +290,159 @@ export const adminToggleUserWithdrawal = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin.from("profiles")
       .update({ withdrawal_enabled: data.enabled }).eq("id", data.user_id);
     if (error) throw error;
+    return { ok: true };
+  });
+
+// ---------- GIFT CODES ----------
+export const adminListGiftCodes = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin.from("gift_codes" as any).select("*").order("created_at", { ascending: false });
+    return { codes: data ?? [] };
+  });
+
+export const adminCreateGiftCode = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({
+    code: z.string().trim().min(3).max(40),
+    amount: z.number().min(1).max(1000000),
+    max_redemptions: z.number().int().min(1).max(100000),
+    expires_at: z.string().optional(),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("gift_codes" as any).insert({
+      code: data.code.toUpperCase(),
+      amount: data.amount,
+      max_redemptions: data.max_redemptions,
+      expires_at: data.expires_at || null,
+    });
+    if (error) throw error;
+    return { ok: true };
+  });
+
+export const adminToggleGiftCode = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ id: z.string().uuid(), active: z.boolean() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("gift_codes" as any).update({ active: data.active }).eq("id", data.id);
+    if (error) throw error;
+    return { ok: true };
+  });
+
+export const adminDeleteGiftCode = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("gift_codes" as any).delete().eq("id", data.id);
+    if (error) throw error;
+    return { ok: true };
+  });
+
+// ---------- NEWS ----------
+export const adminListNews = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin.from("news_posts" as any).select("*").order("created_at", { ascending: false });
+    return { posts: data ?? [] };
+  });
+
+export const adminUpsertNews = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({
+    id: z.string().uuid().optional(),
+    title: z.string().min(1).max(200),
+    body: z.string().min(1).max(20000),
+    cover_url: z.string().max(2000).optional(),
+    published: z.boolean().optional(),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (data.id) {
+      const { error } = await supabaseAdmin.from("news_posts" as any).update({
+        title: data.title, body: data.body, cover_url: data.cover_url || null, published: data.published ?? true,
+      }).eq("id", data.id);
+      if (error) throw error;
+    } else {
+      const { error } = await supabaseAdmin.from("news_posts" as any).insert({
+        title: data.title, body: data.body, cover_url: data.cover_url || null, published: data.published ?? true,
+      });
+      if (error) throw error;
+    }
+    return { ok: true };
+  });
+
+export const adminDeleteNews = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("news_posts" as any).delete().eq("id", data.id);
+    if (error) throw error;
+    return { ok: true };
+  });
+
+// ---------- MANUAL DEPOSITS ----------
+export const adminListPendingDeposits = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: txs } = await supabaseAdmin
+      .from("transactions")
+      .select("*")
+      .eq("type", "deposit")
+      .eq("status", "pending")
+      .eq("method" as any, "manual")
+      .order("created_at", { ascending: false });
+    const ids = (txs ?? []).map((t) => t.user_id);
+    const { data: profiles } = ids.length
+      ? await supabaseAdmin.from("profiles").select("id, phone, full_name").in("id", ids)
+      : { data: [] as any[] };
+    const map: Record<string, any> = {};
+    (profiles ?? []).forEach((p) => { map[p.id] = p; });
+    return { rows: (txs ?? []).map((t) => ({ ...t, profile: map[t.user_id] ?? null })) };
+  });
+
+export const adminDecideDeposit = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ tx_id: z.string().uuid(), decision: z.enum(["approve", "reject"]) }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: tx } = await supabaseAdmin.from("transactions").select("*").eq("id", data.tx_id).maybeSingle();
+    if (!tx || tx.type !== "deposit" || tx.status !== "pending") throw new Error("Invalid transaction");
+    if (data.decision === "approve") {
+      const amount = Number(tx.amount);
+      const { data: p } = await supabaseAdmin.from("profiles").select("balance, referred_by").eq("id", tx.user_id).maybeSingle();
+      if (!p) throw new Error("User missing");
+      await supabaseAdmin.from("profiles").update({ balance: Number(p.balance) + amount }).eq("id", tx.user_id);
+      await supabaseAdmin.from("transactions").update({ status: "success" }).eq("id", tx.id);
+      const referrerId = (p as any).referred_by as string | null;
+      if (referrerId) {
+        const rebate = Math.round(amount * 0.10 * 100) / 100;
+        const { data: r } = await supabaseAdmin.from("profiles").select("balance").eq("id", referrerId).maybeSingle();
+        if (r) {
+          await supabaseAdmin.from("profiles").update({ balance: Number(r.balance) + rebate }).eq("id", referrerId);
+          await supabaseAdmin.from("transactions").insert({
+            user_id: referrerId, type: "rebate", amount: rebate, status: "success",
+            description: "Rebate from downline manual deposit",
+          });
+        }
+      }
+    } else {
+      await supabaseAdmin.from("transactions").update({ status: "failed", description: "Rejected by admin" }).eq("id", tx.id);
+    }
     return { ok: true };
   });

@@ -14,6 +14,70 @@ export const getMe = createServerFn({ method: "GET" })
     return { profile, roles: (roles ?? []).map((r) => r.role) };
   });
 
+// ---- Public site settings (for deposit info, social links, limits) ----
+export const getPublicSettings = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data } = await context.supabase
+      .from("site_settings")
+      .select("min_deposit, min_withdrawal, withdrawals_enabled, payment_paybill, payment_account, payment_instructions, whatsapp_url, telegram_url")
+      .eq("id", 1)
+      .maybeSingle();
+    return { settings: data };
+  });
+
+// ---- News ----
+export const listNews = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data } = await context.supabase
+      .from("news_posts" as any)
+      .select("*")
+      .eq("published", true)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    return { posts: (data ?? []) as unknown as Array<{ id: string; title: string; body: string; cover_url: string | null; created_at: string }> };
+  });
+
+// ---- Gift code redemption ----
+export const redeemGiftCode = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ code: z.string().trim().min(1).max(40) }).parse(d))
+  .handler(async ({ data, context }) => {
+    const code = data.code.trim().toUpperCase();
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: gc } = await supabaseAdmin
+      .from("gift_codes" as any)
+      .select("*")
+      .eq("code", code)
+      .maybeSingle();
+    if (!gc) throw new Error("Invalid gift code");
+    const g = gc as any;
+    if (!g.active) throw new Error("This code is no longer active");
+    if (g.expires_at && new Date(g.expires_at).getTime() < Date.now()) throw new Error("This code has expired");
+    if (g.used_count >= g.max_redemptions) throw new Error("This code has reached its redemption limit");
+    const { data: existing } = await supabaseAdmin
+      .from("gift_redemptions" as any)
+      .select("id")
+      .eq("user_id", context.userId)
+      .eq("code", code)
+      .maybeSingle();
+    if (existing) throw new Error("You have already redeemed this code");
+
+    const { error: re } = await supabaseAdmin.from("gift_redemptions" as any).insert({
+      user_id: context.userId, code, amount: g.amount,
+    });
+    if (re) throw re;
+    await supabaseAdmin.from("gift_codes" as any).update({ used_count: g.used_count + 1 }).eq("id", g.id);
+    const { data: p } = await supabaseAdmin.from("profiles").select("balance").eq("id", context.userId).maybeSingle();
+    await supabaseAdmin.from("profiles").update({ balance: Number(p?.balance ?? 0) + Number(g.amount) }).eq("id", context.userId);
+    await supabaseAdmin.from("transactions").insert({
+      user_id: context.userId, type: "gift", amount: Number(g.amount),
+      status: "success", description: `Gift code ${code}`, reference: code,
+    });
+    return { ok: true, amount: Number(g.amount) };
+  });
+
 // ---- Packages catalog & user packages ----
 export const listCatalog = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -44,7 +108,7 @@ export const purchasePackage = createServerFn({ method: "POST" })
     const { data: plan, error: pe } = await supabase
       .from("packages_catalog").select("*").eq("code", data.code).maybeSingle();
     if (pe || !plan) throw new Error("Plan not found");
-    const { data: profile } = await supabase.from("profiles").select("balance").eq("id", userId).maybeSingle();
+    const { data: profile } = await supabase.from("profiles").select("balance, referred_by").eq("id", userId).maybeSingle();
     if (!profile) throw new Error("Profile missing");
     if (Number(profile.balance) < Number(plan.deposit)) throw new Error("Insufficient balance — please deposit first");
 
@@ -60,6 +124,76 @@ export const purchasePackage = createServerFn({ method: "POST" })
       user_id: userId, type: "deposit", amount: -Number(plan.deposit),
       status: "success", description: `Purchased ${plan.name}`, reference: plan.code,
     });
+    // 10% referral rebate to upline on package purchase
+    if ((profile as any).referred_by) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await creditReferralRebate(supabaseAdmin, (profile as any).referred_by, Number(plan.deposit), `Rebate from ${plan.code} purchase`);
+    }
+    return { ok: true };
+  });
+
+async function creditReferralRebate(supabaseAdmin: any, referrerId: string, baseAmount: number, note: string) {
+  const rebate = Math.round(baseAmount * 0.10 * 100) / 100;
+  if (rebate <= 0) return;
+  const { data: r } = await supabaseAdmin.from("profiles").select("balance").eq("id", referrerId).maybeSingle();
+  if (!r) return;
+  await supabaseAdmin.from("profiles").update({ balance: Number(r.balance) + rebate }).eq("id", referrerId);
+  await supabaseAdmin.from("transactions").insert({
+    user_id: referrerId, type: "rebate", amount: rebate, status: "success", description: note,
+  });
+}
+
+// ---- Daily task claim (one per day, sums active package daily_income) ----
+export const claimDailyIncome = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const today = new Date().toISOString().slice(0, 10);
+    const { data: pkgs } = await supabase
+      .from("user_packages")
+      .select("id, last_claimed_at, packages_catalog(daily_income)")
+      .eq("user_id", userId)
+      .eq("status", "active");
+    const eligible = (pkgs ?? []).filter((p: any) => p.last_claimed_at !== today);
+    if (!eligible.length) {
+      if (!pkgs?.length) throw new Error("You need to purchase a package first");
+      throw new Error("You have already claimed today. Come back tomorrow.");
+    }
+    let total = 0;
+    for (const p of eligible) {
+      total += Number((p as any).packages_catalog?.daily_income ?? 0);
+    }
+    if (total <= 0) throw new Error("Nothing to claim today");
+    const ids = eligible.map((p: any) => p.id);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("user_packages").update({ last_claimed_at: today }).in("id", ids);
+    const { data: pr } = await supabaseAdmin.from("profiles").select("balance").eq("id", userId).maybeSingle();
+    await supabaseAdmin.from("profiles").update({ balance: Number(pr?.balance ?? 0) + total }).eq("id", userId);
+    await supabaseAdmin.from("transactions").insert({
+      user_id: userId, type: "rebate", amount: total, status: "success", description: "Daily task claim",
+    });
+    return { ok: true, amount: total };
+  });
+
+// ---- Manual deposit (user pastes mpesa SMS, admin approves) ----
+export const createManualDeposit = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({
+    amount: z.number().min(10).max(1000000),
+    mpesa_message: z.string().trim().min(10).max(1000),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("transactions").insert({
+      user_id: context.userId,
+      type: "deposit",
+      amount: data.amount,
+      status: "pending",
+      method: "manual",
+      mpesa_message: data.mpesa_message,
+      description: "Manual M-Pesa deposit (awaiting admin approval)",
+    } as any);
+    if (error) throw error;
     return { ok: true };
   });
 
@@ -113,7 +247,8 @@ export const createDeposit = createServerFn({ method: "POST" })
       description: "M-Pesa STK Push",
       checkout_request_id: stk.CheckoutRequestID,
       merchant_request_id: stk.MerchantRequestID,
-    });
+      method: "stk",
+    } as any);
     if (txe) throw txe;
 
     return {
@@ -145,22 +280,37 @@ export const createWithdrawal = createServerFn({ method: "POST" })
   }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    // Nairobi (UTC+3) business hours: Mon–Fri, 09:00–17:00
+    const now = new Date();
+    const nbo = new Date(now.getTime() + (3 * 60 - now.getTimezoneOffset() * -1) * 60_000);
+    // Simpler: compute Nairobi hour/day via UTC + 3
+    const utcMs = now.getTime();
+    const nboDate = new Date(utcMs + 3 * 3600_000);
+    const day = nboDate.getUTCDay(); // 0 Sun .. 6 Sat
+    const hour = nboDate.getUTCHours();
+    if (day === 0 || day === 6) throw new Error("Withdrawals are processed Mon–Fri only.");
+    if (hour < 9 || hour >= 17) throw new Error("Withdrawals are processed between 9:00 AM and 5:00 PM (EAT).");
+    void nbo;
     const { data: settings } = await supabase.from("site_settings").select("withdrawals_enabled, min_withdrawal").eq("id", 1).maybeSingle();
     if (settings && settings.withdrawals_enabled === false) throw new Error("Withdrawals are currently suspended");
     if (settings && data.amount < Number(settings.min_withdrawal)) throw new Error(`Minimum withdrawal is KES ${settings.min_withdrawal}`);
-    const { data: profile } = await supabase.from("profiles").select("balance, withdrawal_enabled").eq("id", userId).maybeSingle();
+    const { data: profile } = await supabase.from("profiles").select("balance, withdrawal_enabled, has_withdrawn").eq("id", userId).maybeSingle();
     if (!profile) throw new Error("Profile missing");
     if ((profile as any).withdrawal_enabled === false) throw new Error("Your withdrawal access is disabled. Contact support.");
+    if ((profile as any).has_withdrawn === true) throw new Error("You have already used your one-time withdrawal.");
     if (Number(profile.balance) < data.amount) throw new Error("Insufficient balance");
+    const tax = Math.round(data.amount * 0.10 * 100) / 100;
+    const net = data.amount - tax;
     // Reserve funds and create pending withdrawal (admin to approve)
     const { error: txe } = await supabase.from("transactions").insert({
       user_id: userId, type: "withdrawal", amount: data.amount, status: "pending",
-      mpesa_number: data.mpesa_number, description: "M-Pesa withdrawal request",
+      mpesa_number: data.mpesa_number,
+      description: `M-Pesa withdrawal request — tax KES ${tax.toFixed(2)}, net KES ${net.toFixed(2)}`,
     });
     if (txe) throw txe;
-    const { error: be } = await supabase.from("profiles").update({ balance: Number(profile.balance) - data.amount }).eq("id", userId);
+    const { error: be } = await supabase.from("profiles").update({ balance: Number(profile.balance) - data.amount, has_withdrawn: true } as any).eq("id", userId);
     if (be) throw be;
-    return { ok: true, balance: Number(profile.balance) - data.amount };
+    return { ok: true, balance: Number(profile.balance) - data.amount, tax, net };
   });
 
 // ---- Team ----

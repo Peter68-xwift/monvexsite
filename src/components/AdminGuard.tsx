@@ -1,15 +1,18 @@
 import { useEffect, type ReactNode } from "react";
 import { useNavigate, Link, useRouterState } from "@tanstack/react-router";
 import { useMe } from "@/hooks/useMe";
-import { Loader2, LayoutDashboard, Users, Wallet, Package, Settings, CreditCard, LogOut } from "lucide-react";
+import { Loader2, LayoutDashboard, Users, Wallet, Package, Settings, CreditCard, LogOut, Gift, Newspaper, Banknote } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const items = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/admin/users", label: "Users", icon: Users },
-  { to: "/admin/payments", label: "Payments", icon: CreditCard },
+  { to: "/admin/payments", label: "Withdrawals", icon: CreditCard },
+  { to: "/admin/deposits", label: "Deposits", icon: Banknote },
   { to: "/admin/wallet", label: "Wallet", icon: Wallet },
   { to: "/admin/packages", label: "Packages", icon: Package },
+  { to: "/admin/gift-codes", label: "Gift Codes", icon: Gift },
+  { to: "/admin/news", label: "News", icon: Newspaper },
   { to: "/admin/settings", label: "Settings", icon: Settings },
 ];
 

@@ -47,6 +47,11 @@ function SettingsPage() {
         maintenance_mode: form.maintenance_mode,
         min_deposit: Number(form.min_deposit),
         min_withdrawal: Number(form.min_withdrawal),
+        payment_paybill: form.payment_paybill ?? "",
+        payment_account: form.payment_account ?? "",
+        payment_instructions: form.payment_instructions ?? "",
+        whatsapp_url: form.whatsapp_url ?? "",
+        telegram_url: form.telegram_url ?? "",
       } });
       setMsg("Saved");
       qc.invalidateQueries({ queryKey: ["admin-settings"] });
@@ -85,6 +90,41 @@ function SettingsPage() {
               className="mt-1 w-full rounded-lg bg-slate-950 ring-1 ring-slate-800 px-3 py-2 outline-none focus:ring-emerald-500" />
           </label>
         </div>
+      </div>
+
+      <div className="rounded-xl bg-slate-900 ring-1 ring-slate-800 p-5 space-y-3">
+        <h2 className="font-semibold">Manual deposit (M-Pesa) details</h2>
+        <label className="block">
+          <span className="text-xs text-slate-400">Pay Bill / Business number</span>
+          <input value={form.payment_paybill ?? ""} onChange={(e) => setForm({ ...form, payment_paybill: e.target.value })}
+            className="mt-1 w-full rounded-lg bg-slate-950 ring-1 ring-slate-800 px-3 py-2 outline-none focus:ring-emerald-500" />
+        </label>
+        <label className="block">
+          <span className="text-xs text-slate-400">Account number</span>
+          <input value={form.payment_account ?? ""} onChange={(e) => setForm({ ...form, payment_account: e.target.value })}
+            className="mt-1 w-full rounded-lg bg-slate-950 ring-1 ring-slate-800 px-3 py-2 outline-none focus:ring-emerald-500" />
+        </label>
+        <label className="block">
+          <span className="text-xs text-slate-400">Payment instructions</span>
+          <textarea rows={3} value={form.payment_instructions ?? ""} onChange={(e) => setForm({ ...form, payment_instructions: e.target.value })}
+            className="mt-1 w-full rounded-lg bg-slate-950 ring-1 ring-slate-800 px-3 py-2 outline-none focus:ring-emerald-500 text-sm" />
+        </label>
+      </div>
+
+      <div className="rounded-xl bg-slate-900 ring-1 ring-slate-800 p-5 space-y-3">
+        <h2 className="font-semibold">Community links</h2>
+        <label className="block">
+          <span className="text-xs text-slate-400">WhatsApp group URL</span>
+          <input value={form.whatsapp_url ?? ""} onChange={(e) => setForm({ ...form, whatsapp_url: e.target.value })}
+            placeholder="https://chat.whatsapp.com/..."
+            className="mt-1 w-full rounded-lg bg-slate-950 ring-1 ring-slate-800 px-3 py-2 outline-none focus:ring-emerald-500" />
+        </label>
+        <label className="block">
+          <span className="text-xs text-slate-400">Telegram group URL</span>
+          <input value={form.telegram_url ?? ""} onChange={(e) => setForm({ ...form, telegram_url: e.target.value })}
+            placeholder="https://t.me/..."
+            className="mt-1 w-full rounded-lg bg-slate-950 ring-1 ring-slate-800 px-3 py-2 outline-none focus:ring-emerald-500" />
+        </label>
       </div>
 
       <div className="flex items-center gap-3">

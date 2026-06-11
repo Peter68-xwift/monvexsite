@@ -14,6 +14,90 @@ export type Database = {
   }
   public: {
     Tables: {
+      gift_codes: {
+        Row: {
+          active: boolean
+          amount: number
+          code: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          max_redemptions: number
+          used_count: number
+        }
+        Insert: {
+          active?: boolean
+          amount: number
+          code: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          max_redemptions?: number
+          used_count?: number
+        }
+        Update: {
+          active?: boolean
+          amount?: number
+          code?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          max_redemptions?: number
+          used_count?: number
+        }
+        Relationships: []
+      }
+      gift_redemptions: {
+        Row: {
+          amount: number
+          code: string
+          id: string
+          redeemed_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          code: string
+          id?: string
+          redeemed_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          code?: string
+          id?: string
+          redeemed_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      news_posts: {
+        Row: {
+          body: string
+          cover_url: string | null
+          created_at: string
+          id: string
+          published: boolean
+          title: string
+        }
+        Insert: {
+          body: string
+          cover_url?: string | null
+          created_at?: string
+          id?: string
+          published?: boolean
+          title: string
+        }
+        Update: {
+          body?: string
+          cover_url?: string | null
+          created_at?: string
+          id?: string
+          published?: boolean
+          title?: string
+        }
+        Relationships: []
+      }
       packages_catalog: {
         Row: {
           code: string
@@ -50,6 +134,7 @@ export type Database = {
           created_at: string
           full_name: string | null
           fund_password_hash: string | null
+          has_withdrawn: boolean
           id: string
           phone: string
           referral_code: string
@@ -62,6 +147,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           fund_password_hash?: string | null
+          has_withdrawn?: boolean
           id: string
           phone: string
           referral_code: string
@@ -74,6 +160,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           fund_password_hash?: string | null
+          has_withdrawn?: boolean
           id?: string
           phone?: string
           referral_code?: string
@@ -97,9 +184,14 @@ export type Database = {
           maintenance_mode: boolean
           min_deposit: number
           min_withdrawal: number
+          payment_account: string
+          payment_instructions: string
+          payment_paybill: string
           registrations_enabled: boolean
           tasks_enabled: boolean
+          telegram_url: string
           updated_at: string
+          whatsapp_url: string
           withdrawals_enabled: boolean
         }
         Insert: {
@@ -107,9 +199,14 @@ export type Database = {
           maintenance_mode?: boolean
           min_deposit?: number
           min_withdrawal?: number
+          payment_account?: string
+          payment_instructions?: string
+          payment_paybill?: string
           registrations_enabled?: boolean
           tasks_enabled?: boolean
+          telegram_url?: string
           updated_at?: string
+          whatsapp_url?: string
           withdrawals_enabled?: boolean
         }
         Update: {
@@ -117,9 +214,14 @@ export type Database = {
           maintenance_mode?: boolean
           min_deposit?: number
           min_withdrawal?: number
+          payment_account?: string
+          payment_instructions?: string
+          payment_paybill?: string
           registrations_enabled?: boolean
           tasks_enabled?: boolean
+          telegram_url?: string
           updated_at?: string
+          whatsapp_url?: string
           withdrawals_enabled?: boolean
         }
         Relationships: []
@@ -133,6 +235,8 @@ export type Database = {
           id: string
           merchant_request_id: string | null
           meta: Json
+          method: string | null
+          mpesa_message: string | null
           mpesa_number: string | null
           mpesa_receipt: string | null
           reference: string | null
@@ -149,6 +253,8 @@ export type Database = {
           id?: string
           merchant_request_id?: string | null
           meta?: Json
+          method?: string | null
+          mpesa_message?: string | null
           mpesa_number?: string | null
           mpesa_receipt?: string | null
           reference?: string | null
@@ -165,6 +271,8 @@ export type Database = {
           id?: string
           merchant_request_id?: string | null
           meta?: Json
+          method?: string | null
+          mpesa_message?: string | null
           mpesa_number?: string | null
           mpesa_receipt?: string | null
           reference?: string | null
@@ -179,6 +287,7 @@ export type Database = {
         Row: {
           expires_at: string
           id: string
+          last_claimed_at: string | null
           last_income_at: string | null
           package_code: string
           started_at: string
@@ -189,6 +298,7 @@ export type Database = {
         Insert: {
           expires_at: string
           id?: string
+          last_claimed_at?: string | null
           last_income_at?: string | null
           package_code: string
           started_at?: string
@@ -199,6 +309,7 @@ export type Database = {
         Update: {
           expires_at?: string
           id?: string
+          last_claimed_at?: string | null
           last_income_at?: string | null
           package_code?: string
           started_at?: string

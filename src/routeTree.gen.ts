@@ -10,12 +10,15 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WithdrawRouteImport } from './routes/withdraw'
+import { Route as WealthRouteImport } from './routes/wealth'
 import { Route as TeamRouteImport } from './routes/team'
 import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as SecurityRouteImport } from './routes/security'
 import { Route as RecordsRouteImport } from './routes/records'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PackagesRouteImport } from './routes/packages'
+import { Route as NewsRouteImport } from './routes/news'
+import { Route as GiftRouteImport } from './routes/gift'
 import { Route as DownloadRouteImport } from './routes/download'
 import { Route as DepositRouteImport } from './routes/deposit'
 import { Route as CompanyRouteImport } from './routes/company'
@@ -28,11 +31,19 @@ import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
 import { Route as AdminPackagesRouteImport } from './routes/admin.packages'
+import { Route as AdminNewsRouteImport } from './routes/admin.news'
+import { Route as AdminGiftCodesRouteImport } from './routes/admin.gift-codes'
+import { Route as AdminDepositsRouteImport } from './routes/admin.deposits'
 import { Route as ApiPublicMpesaCallbackRouteImport } from './routes/api/public/mpesa.callback'
 
 const WithdrawRoute = WithdrawRouteImport.update({
   id: '/withdraw',
   path: '/withdraw',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WealthRoute = WealthRouteImport.update({
+  id: '/wealth',
+  path: '/wealth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TeamRoute = TeamRouteImport.update({
@@ -63,6 +74,16 @@ const ProfileRoute = ProfileRouteImport.update({
 const PackagesRoute = PackagesRouteImport.update({
   id: '/packages',
   path: '/packages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsRoute = NewsRouteImport.update({
+  id: '/news',
+  path: '/news',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GiftRoute = GiftRouteImport.update({
+  id: '/gift',
+  path: '/gift',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DownloadRoute = DownloadRouteImport.update({
@@ -125,6 +146,21 @@ const AdminPackagesRoute = AdminPackagesRouteImport.update({
   path: '/packages',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminNewsRoute = AdminNewsRouteImport.update({
+  id: '/news',
+  path: '/news',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminGiftCodesRoute = AdminGiftCodesRouteImport.update({
+  id: '/gift-codes',
+  path: '/gift-codes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDepositsRoute = AdminDepositsRouteImport.update({
+  id: '/deposits',
+  path: '/deposits',
+  getParentRoute: () => AdminRoute,
+} as any)
 const ApiPublicMpesaCallbackRoute = ApiPublicMpesaCallbackRouteImport.update({
   id: '/api/public/mpesa/callback',
   path: '/api/public/mpesa/callback',
@@ -138,13 +174,19 @@ export interface FileRoutesByFullPath {
   '/company': typeof CompanyRoute
   '/deposit': typeof DepositRoute
   '/download': typeof DownloadRoute
+  '/gift': typeof GiftRoute
+  '/news': typeof NewsRoute
   '/packages': typeof PackagesRoute
   '/profile': typeof ProfileRoute
   '/records': typeof RecordsRoute
   '/security': typeof SecurityRoute
   '/tasks': typeof TasksRoute
   '/team': typeof TeamRoute
+  '/wealth': typeof WealthRoute
   '/withdraw': typeof WithdrawRoute
+  '/admin/deposits': typeof AdminDepositsRoute
+  '/admin/gift-codes': typeof AdminGiftCodesRoute
+  '/admin/news': typeof AdminNewsRoute
   '/admin/packages': typeof AdminPackagesRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -159,13 +201,19 @@ export interface FileRoutesByTo {
   '/company': typeof CompanyRoute
   '/deposit': typeof DepositRoute
   '/download': typeof DownloadRoute
+  '/gift': typeof GiftRoute
+  '/news': typeof NewsRoute
   '/packages': typeof PackagesRoute
   '/profile': typeof ProfileRoute
   '/records': typeof RecordsRoute
   '/security': typeof SecurityRoute
   '/tasks': typeof TasksRoute
   '/team': typeof TeamRoute
+  '/wealth': typeof WealthRoute
   '/withdraw': typeof WithdrawRoute
+  '/admin/deposits': typeof AdminDepositsRoute
+  '/admin/gift-codes': typeof AdminGiftCodesRoute
+  '/admin/news': typeof AdminNewsRoute
   '/admin/packages': typeof AdminPackagesRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -182,13 +230,19 @@ export interface FileRoutesById {
   '/company': typeof CompanyRoute
   '/deposit': typeof DepositRoute
   '/download': typeof DownloadRoute
+  '/gift': typeof GiftRoute
+  '/news': typeof NewsRoute
   '/packages': typeof PackagesRoute
   '/profile': typeof ProfileRoute
   '/records': typeof RecordsRoute
   '/security': typeof SecurityRoute
   '/tasks': typeof TasksRoute
   '/team': typeof TeamRoute
+  '/wealth': typeof WealthRoute
   '/withdraw': typeof WithdrawRoute
+  '/admin/deposits': typeof AdminDepositsRoute
+  '/admin/gift-codes': typeof AdminGiftCodesRoute
+  '/admin/news': typeof AdminNewsRoute
   '/admin/packages': typeof AdminPackagesRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -206,13 +260,19 @@ export interface FileRouteTypes {
     | '/company'
     | '/deposit'
     | '/download'
+    | '/gift'
+    | '/news'
     | '/packages'
     | '/profile'
     | '/records'
     | '/security'
     | '/tasks'
     | '/team'
+    | '/wealth'
     | '/withdraw'
+    | '/admin/deposits'
+    | '/admin/gift-codes'
+    | '/admin/news'
     | '/admin/packages'
     | '/admin/payments'
     | '/admin/settings'
@@ -227,13 +287,19 @@ export interface FileRouteTypes {
     | '/company'
     | '/deposit'
     | '/download'
+    | '/gift'
+    | '/news'
     | '/packages'
     | '/profile'
     | '/records'
     | '/security'
     | '/tasks'
     | '/team'
+    | '/wealth'
     | '/withdraw'
+    | '/admin/deposits'
+    | '/admin/gift-codes'
+    | '/admin/news'
     | '/admin/packages'
     | '/admin/payments'
     | '/admin/settings'
@@ -249,13 +315,19 @@ export interface FileRouteTypes {
     | '/company'
     | '/deposit'
     | '/download'
+    | '/gift'
+    | '/news'
     | '/packages'
     | '/profile'
     | '/records'
     | '/security'
     | '/tasks'
     | '/team'
+    | '/wealth'
     | '/withdraw'
+    | '/admin/deposits'
+    | '/admin/gift-codes'
+    | '/admin/news'
     | '/admin/packages'
     | '/admin/payments'
     | '/admin/settings'
@@ -272,12 +344,15 @@ export interface RootRouteChildren {
   CompanyRoute: typeof CompanyRoute
   DepositRoute: typeof DepositRoute
   DownloadRoute: typeof DownloadRoute
+  GiftRoute: typeof GiftRoute
+  NewsRoute: typeof NewsRoute
   PackagesRoute: typeof PackagesRoute
   ProfileRoute: typeof ProfileRoute
   RecordsRoute: typeof RecordsRoute
   SecurityRoute: typeof SecurityRoute
   TasksRoute: typeof TasksRoute
   TeamRoute: typeof TeamRoute
+  WealthRoute: typeof WealthRoute
   WithdrawRoute: typeof WithdrawRoute
   ApiPublicMpesaCallbackRoute: typeof ApiPublicMpesaCallbackRoute
 }
@@ -289,6 +364,13 @@ declare module '@tanstack/react-router' {
       path: '/withdraw'
       fullPath: '/withdraw'
       preLoaderRoute: typeof WithdrawRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/wealth': {
+      id: '/wealth'
+      path: '/wealth'
+      fullPath: '/wealth'
+      preLoaderRoute: typeof WealthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/team': {
@@ -331,6 +413,20 @@ declare module '@tanstack/react-router' {
       path: '/packages'
       fullPath: '/packages'
       preLoaderRoute: typeof PackagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/news': {
+      id: '/news'
+      path: '/news'
+      fullPath: '/news'
+      preLoaderRoute: typeof NewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gift': {
+      id: '/gift'
+      path: '/gift'
+      fullPath: '/gift'
+      preLoaderRoute: typeof GiftRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/download': {
@@ -417,6 +513,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPackagesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/news': {
+      id: '/admin/news'
+      path: '/news'
+      fullPath: '/admin/news'
+      preLoaderRoute: typeof AdminNewsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/gift-codes': {
+      id: '/admin/gift-codes'
+      path: '/gift-codes'
+      fullPath: '/admin/gift-codes'
+      preLoaderRoute: typeof AdminGiftCodesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/deposits': {
+      id: '/admin/deposits'
+      path: '/deposits'
+      fullPath: '/admin/deposits'
+      preLoaderRoute: typeof AdminDepositsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/api/public/mpesa/callback': {
       id: '/api/public/mpesa/callback'
       path: '/api/public/mpesa/callback'
@@ -428,6 +545,9 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminDepositsRoute: typeof AdminDepositsRoute
+  AdminGiftCodesRoute: typeof AdminGiftCodesRoute
+  AdminNewsRoute: typeof AdminNewsRoute
   AdminPackagesRoute: typeof AdminPackagesRoute
   AdminPaymentsRoute: typeof AdminPaymentsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
@@ -437,6 +557,9 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminDepositsRoute: AdminDepositsRoute,
+  AdminGiftCodesRoute: AdminGiftCodesRoute,
+  AdminNewsRoute: AdminNewsRoute,
   AdminPackagesRoute: AdminPackagesRoute,
   AdminPaymentsRoute: AdminPaymentsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
@@ -454,12 +577,15 @@ const rootRouteChildren: RootRouteChildren = {
   CompanyRoute: CompanyRoute,
   DepositRoute: DepositRoute,
   DownloadRoute: DownloadRoute,
+  GiftRoute: GiftRoute,
+  NewsRoute: NewsRoute,
   PackagesRoute: PackagesRoute,
   ProfileRoute: ProfileRoute,
   RecordsRoute: RecordsRoute,
   SecurityRoute: SecurityRoute,
   TasksRoute: TasksRoute,
   TeamRoute: TeamRoute,
+  WealthRoute: WealthRoute,
   WithdrawRoute: WithdrawRoute,
   ApiPublicMpesaCallbackRoute: ApiPublicMpesaCallbackRoute,
 }

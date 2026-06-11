@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Shell } from "@/components/Shell";
-import { ArrowLeft, Smartphone, Loader2, CheckCircle2, Wallet } from "lucide-react";
+import { ArrowLeft, Smartphone, Loader2, CheckCircle2, Wallet, Clock, Percent, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { createWithdrawal } from "@/lib/monvex.functions";
@@ -25,6 +25,7 @@ function WithdrawPage() {
   const navigate = useNavigate();
   const { data: me } = useMe();
   const BALANCE = Number(me?.profile?.balance ?? 0);
+  const hasWithdrawn = !!(me?.profile as any)?.has_withdrawn;
   const withdraw = useServerFn(createWithdrawal);
   const qc = useQueryClient();
   const [step, setStep] = useState<Step>("form");
@@ -37,6 +38,7 @@ function WithdrawPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    if (hasWithdrawn) { setError("You have already used your one-time withdrawal."); return; }
     if (!isValidPhone(phone)) {
       setError("Enter a valid Safaricom number, e.g. 0712345678");
       return;
@@ -61,6 +63,10 @@ function WithdrawPage() {
       setStep("form");
     }
   };
+
+  const amtNum = Number(amount) || 0;
+  const tax = Math.round(amtNum * 0.10 * 100) / 100;
+  const net = amtNum - tax;
 
   return (
     <Shell bg="bg-slate-50">
@@ -89,6 +95,14 @@ function WithdrawPage() {
         <div className="bg-white rounded-3xl p-5 shadow-xl ring-1 ring-black/5">
           {step === "form" && (
             <form onSubmit={submit} className="space-y-4">
+              <div className="rounded-2xl bg-amber-50 ring-1 ring-amber-100 p-3 space-y-1.5 text-xs text-amber-900">
+                <div className="flex items-center gap-2 font-semibold"><Clock className="h-3.5 w-3.5" /> Processed Mon–Fri, 9:00 AM – 5:00 PM (EAT)</div>
+                <div className="flex items-center gap-2 font-semibold"><Percent className="h-3.5 w-3.5" /> 10% tax fee deducted from every withdrawal</div>
+                <div className="flex items-center gap-2 font-semibold"><AlertCircle className="h-3.5 w-3.5" /> One withdrawal per account</div>
+              </div>
+              {hasWithdrawn && (
+                <p className="text-xs font-semibold text-rose-600 bg-rose-50 rounded-xl p-3">You've already used your one-time withdrawal.</p>
+              )}
               <div>
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">M-Pesa Number</label>
                 <div className="mt-1.5 flex items-center gap-2 rounded-2xl border border-slate-200 px-3 py-3 focus-within:border-rose-500">
@@ -137,10 +151,19 @@ function WithdrawPage() {
                 </div>
               </div>
 
+              {amtNum >= MIN && (
+                <div className="rounded-xl bg-slate-50 p-3 text-xs space-y-1">
+                  <div className="flex justify-between"><span className="text-slate-500">Gross amount</span><span className="font-semibold">KES {amtNum.toLocaleString()}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">10% tax</span><span className="font-semibold text-rose-600">- KES {tax.toLocaleString()}</span></div>
+                  <div className="flex justify-between pt-1 border-t border-slate-200"><span className="font-bold">You receive</span><span className="font-extrabold text-emerald-600">KES {net.toLocaleString()}</span></div>
+                </div>
+              )}
+
               {error && <p className="text-sm text-rose-600">{error}</p>}
 
               <button
                 type="submit"
+                disabled={hasWithdrawn}
                 className="w-full rounded-2xl bg-gradient-to-r from-rose-600 to-pink-600 text-white font-semibold py-3.5 shadow-lg"
               >
                 Withdraw to M-Pesa
