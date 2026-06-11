@@ -1,9 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Shell } from "@/components/Shell";
-import { Wallet, HandCoins, Gem, Vault, Gift, Users, Megaphone, Info, Zap, Power, Bell, TrendingUp, ArrowUpRight } from "lucide-react";
+import { Wallet, HandCoins, Gem, Vault, Gift, Users, Megaphone, Info, Zap, Power, TrendingUp, ArrowUpRight, MessageCircle, Send } from "lucide-react";
 import { useMe } from "@/hooks/useMe";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { getPublicSettings } from "@/lib/monvex.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -18,18 +21,22 @@ export const Route = createFileRoute("/")({
 const tiles = [
   { label: "Deposit", Icon: Wallet, tint: "from-emerald-400/20 to-emerald-500/5", iconColor: "text-emerald-600", to: "/deposit" as const },
   { label: "Withdraw", Icon: HandCoins, tint: "from-rose-400/20 to-rose-500/5", iconColor: "text-rose-600", to: "/withdraw" as const },
-  { label: "Levels", Icon: Gem, tint: "from-violet-400/20 to-violet-500/5", iconColor: "text-violet-600" },
-  { label: "Wealth", Icon: Vault, tint: "from-amber-400/20 to-amber-500/5", iconColor: "text-amber-600" },
-  { label: "Gift Card", Icon: Gift, tint: "from-pink-400/20 to-pink-500/5", iconColor: "text-pink-600" },
+  { label: "Levels", Icon: Gem, tint: "from-violet-400/20 to-violet-500/5", iconColor: "text-violet-600", to: "/packages" as const },
+  { label: "Wealth", Icon: Vault, tint: "from-amber-400/20 to-amber-500/5", iconColor: "text-amber-600", to: "/wealth" as const },
+  { label: "Gift Code", Icon: Gift, tint: "from-pink-400/20 to-pink-500/5", iconColor: "text-pink-600", to: "/gift" as const },
   { label: "My Team", Icon: Users, tint: "from-sky-400/20 to-sky-500/5", iconColor: "text-sky-600", to: "/team" as const },
-  { label: "News", Icon: Megaphone, tint: "from-indigo-400/20 to-indigo-500/5", iconColor: "text-indigo-600" },
-  { label: "Benefits", Icon: Info, tint: "from-teal-400/20 to-teal-500/5", iconColor: "text-teal-600" },
-  { label: "Promo", Icon: Zap, tint: "from-orange-400/30 to-orange-500/10", iconColor: "text-orange-600" },
+  { label: "News", Icon: Megaphone, tint: "from-indigo-400/20 to-indigo-500/5", iconColor: "text-indigo-600", to: "/news" as const },
+  { label: "Benefits", Icon: Info, tint: "from-teal-400/20 to-teal-500/5", iconColor: "text-teal-600", to: "/company" as const },
+  { label: "Promo", Icon: Zap, tint: "from-orange-400/30 to-orange-500/10", iconColor: "text-orange-600", to: "/tasks" as const },
 ];
 
 function Index() {
   const { data } = useMe();
   const navigate = useNavigate();
+  const settingsFn = useServerFn(getPublicSettings);
+  const { data: settingsData } = useQuery({ queryKey: ["public-settings"], queryFn: () => settingsFn() });
+  const whatsapp = (settingsData?.settings as any)?.whatsapp_url || "";
+  const telegram = (settingsData?.settings as any)?.telegram_url || "";
   const profile = data?.profile;
   const fullName = profile?.full_name || profile?.phone || "Member";
   const initials = fullName.slice(0, 2).toUpperCase();
@@ -55,9 +62,18 @@ function Index() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button className="h-10 w-10 rounded-xl bg-white/10 backdrop-blur-md ring-1 ring-white/15 flex items-center justify-center">
-              <Bell className="h-4 w-4" />
-            </button>
+            {whatsapp && (
+              <a href={whatsapp} target="_blank" rel="noreferrer" aria-label="Join WhatsApp"
+                className="h-10 w-10 rounded-xl bg-emerald-500/30 ring-1 ring-emerald-300/30 flex items-center justify-center">
+                <MessageCircle className="h-4 w-4" />
+              </a>
+            )}
+            {telegram && (
+              <a href={telegram} target="_blank" rel="noreferrer" aria-label="Join Telegram"
+                className="h-10 w-10 rounded-xl bg-sky-500/30 ring-1 ring-sky-300/30 flex items-center justify-center">
+                <Send className="h-4 w-4" />
+              </a>
+            )}
             <button onClick={signOut} aria-label="Sign out" className="h-10 w-10 rounded-xl bg-white/10 backdrop-blur-md ring-1 ring-white/15 flex items-center justify-center">
               <Power className="h-4 w-4" />
             </button>
@@ -128,13 +144,29 @@ function Index() {
         })}
       </div>
 
-      {/* Promo banner */}
-      <div className="mx-4 mt-6 relative overflow-hidden rounded-2xl bg-gradient-to-r from-orange-500 to-pink-500 p-5 text-white shadow-lg">
-        <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/15 blur-2xl" />
-        <p className="text-[10px] uppercase tracking-widest text-white/80 font-semibold">Invite & Earn</p>
-        <p className="mt-1 text-lg font-bold leading-tight">Get KES 100 for every friend you refer</p>
-        <button className="mt-3 rounded-full bg-white text-orange-600 font-semibold text-xs px-4 py-2">Share link</button>
-      </div>
+      {/* Community channels */}
+      {(whatsapp || telegram) && (
+        <div className="mx-4 mt-6 grid grid-cols-2 gap-3">
+          {whatsapp && (
+            <a href={whatsapp} target="_blank" rel="noreferrer" className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 p-4 text-white shadow-lg flex items-center gap-3">
+              <MessageCircle className="h-7 w-7" />
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-white/80 font-semibold">Join us on</p>
+                <p className="text-base font-bold">WhatsApp</p>
+              </div>
+            </a>
+          )}
+          {telegram && (
+            <a href={telegram} target="_blank" rel="noreferrer" className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-sky-500 to-blue-600 p-4 text-white shadow-lg flex items-center gap-3">
+              <Send className="h-7 w-7" />
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-white/80 font-semibold">Join us on</p>
+                <p className="text-base font-bold">Telegram</p>
+              </div>
+            </a>
+          )}
+        </div>
+      )}
     </Shell>
   );
 }
