@@ -247,7 +247,8 @@ export const createDeposit = createServerFn({ method: "POST" })
       description: "M-Pesa STK Push",
       checkout_request_id: stk.CheckoutRequestID,
       merchant_request_id: stk.MerchantRequestID,
-    });
+      method: "stk",
+    } as any);
     if (txe) throw txe;
 
     return {
@@ -279,22 +280,37 @@ export const createWithdrawal = createServerFn({ method: "POST" })
   }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    // Nairobi (UTC+3) business hours: Mon–Fri, 09:00–17:00
+    const now = new Date();
+    const nbo = new Date(now.getTime() + (3 * 60 - now.getTimezoneOffset() * -1) * 60_000);
+    // Simpler: compute Nairobi hour/day via UTC + 3
+    const utcMs = now.getTime();
+    const nboDate = new Date(utcMs + 3 * 3600_000);
+    const day = nboDate.getUTCDay(); // 0 Sun .. 6 Sat
+    const hour = nboDate.getUTCHours();
+    if (day === 0 || day === 6) throw new Error("Withdrawals are processed Mon–Fri only.");
+    if (hour < 9 || hour >= 17) throw new Error("Withdrawals are processed between 9:00 AM and 5:00 PM (EAT).");
+    void nbo;
     const { data: settings } = await supabase.from("site_settings").select("withdrawals_enabled, min_withdrawal").eq("id", 1).maybeSingle();
     if (settings && settings.withdrawals_enabled === false) throw new Error("Withdrawals are currently suspended");
     if (settings && data.amount < Number(settings.min_withdrawal)) throw new Error(`Minimum withdrawal is KES ${settings.min_withdrawal}`);
-    const { data: profile } = await supabase.from("profiles").select("balance, withdrawal_enabled").eq("id", userId).maybeSingle();
+    const { data: profile } = await supabase.from("profiles").select("balance, withdrawal_enabled, has_withdrawn").eq("id", userId).maybeSingle();
     if (!profile) throw new Error("Profile missing");
     if ((profile as any).withdrawal_enabled === false) throw new Error("Your withdrawal access is disabled. Contact support.");
+    if ((profile as any).has_withdrawn === true) throw new Error("You have already used your one-time withdrawal.");
     if (Number(profile.balance) < data.amount) throw new Error("Insufficient balance");
+    const tax = Math.round(data.amount * 0.10 * 100) / 100;
+    const net = data.amount - tax;
     // Reserve funds and create pending withdrawal (admin to approve)
     const { error: txe } = await supabase.from("transactions").insert({
       user_id: userId, type: "withdrawal", amount: data.amount, status: "pending",
-      mpesa_number: data.mpesa_number, description: "M-Pesa withdrawal request",
+      mpesa_number: data.mpesa_number,
+      description: `M-Pesa withdrawal request — tax KES ${tax.toFixed(2)}, net KES ${net.toFixed(2)}`,
     });
     if (txe) throw txe;
-    const { error: be } = await supabase.from("profiles").update({ balance: Number(profile.balance) - data.amount }).eq("id", userId);
+    const { error: be } = await supabase.from("profiles").update({ balance: Number(profile.balance) - data.amount, has_withdrawn: true } as any).eq("id", userId);
     if (be) throw be;
-    return { ok: true, balance: Number(profile.balance) - data.amount };
+    return { ok: true, balance: Number(profile.balance) - data.amount, tax, net };
   });
 
 // ---- Team ----
