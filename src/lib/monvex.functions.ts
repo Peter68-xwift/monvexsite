@@ -14,6 +14,70 @@ export const getMe = createServerFn({ method: "GET" })
     return { profile, roles: (roles ?? []).map((r) => r.role) };
   });
 
+// ---- Public site settings (for deposit info, social links, limits) ----
+export const getPublicSettings = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data } = await context.supabase
+      .from("site_settings")
+      .select("min_deposit, min_withdrawal, withdrawals_enabled, payment_paybill, payment_account, payment_instructions, whatsapp_url, telegram_url")
+      .eq("id", 1)
+      .maybeSingle();
+    return { settings: data };
+  });
+
+// ---- News ----
+export const listNews = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data } = await context.supabase
+      .from("news_posts" as any)
+      .select("*")
+      .eq("published", true)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    return { posts: (data ?? []) as Array<{ id: string; title: string; body: string; cover_url: string | null; created_at: string }> };
+  });
+
+// ---- Gift code redemption ----
+export const redeemGiftCode = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ code: z.string().trim().min(1).max(40) }).parse(d))
+  .handler(async ({ data, context }) => {
+    const code = data.code.trim().toUpperCase();
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: gc } = await supabaseAdmin
+      .from("gift_codes" as any)
+      .select("*")
+      .eq("code", code)
+      .maybeSingle();
+    if (!gc) throw new Error("Invalid gift code");
+    const g = gc as any;
+    if (!g.active) throw new Error("This code is no longer active");
+    if (g.expires_at && new Date(g.expires_at).getTime() < Date.now()) throw new Error("This code has expired");
+    if (g.used_count >= g.max_redemptions) throw new Error("This code has reached its redemption limit");
+    const { data: existing } = await supabaseAdmin
+      .from("gift_redemptions" as any)
+      .select("id")
+      .eq("user_id", context.userId)
+      .eq("code", code)
+      .maybeSingle();
+    if (existing) throw new Error("You have already redeemed this code");
+
+    const { error: re } = await supabaseAdmin.from("gift_redemptions" as any).insert({
+      user_id: context.userId, code, amount: g.amount,
+    });
+    if (re) throw re;
+    await supabaseAdmin.from("gift_codes" as any).update({ used_count: g.used_count + 1 }).eq("id", g.id);
+    const { data: p } = await supabaseAdmin.from("profiles").select("balance").eq("id", context.userId).maybeSingle();
+    await supabaseAdmin.from("profiles").update({ balance: Number(p?.balance ?? 0) + Number(g.amount) }).eq("id", context.userId);
+    await supabaseAdmin.from("transactions").insert({
+      user_id: context.userId, type: "gift", amount: Number(g.amount),
+      status: "success", description: `Gift code ${code}`, reference: code,
+    });
+    return { ok: true, amount: Number(g.amount) };
+  });
+
 // ---- Packages catalog & user packages ----
 export const listCatalog = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
