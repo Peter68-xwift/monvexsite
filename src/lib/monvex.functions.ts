@@ -108,6 +108,13 @@ export const purchasePackage = createServerFn({ method: "POST" })
     const { data: plan, error: pe } = await supabase
       .from("packages_catalog").select("*").eq("code", data.code).maybeSingle();
     if (pe || !plan) throw new Error("Plan not found");
+    // Max 2 purchases per package code per user
+    const { count: ownedCount } = await supabase
+      .from("user_packages")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("package_code", plan.code);
+    if ((ownedCount ?? 0) >= 2) throw new Error("You have reached the maximum of 2 purchases for this package");
     const { data: profile } = await supabase.from("profiles").select("balance, referred_by").eq("id", userId).maybeSingle();
     if (!profile) throw new Error("Profile missing");
     if (Number(profile.balance) < Number(plan.deposit)) throw new Error("Insufficient balance — please deposit first");
@@ -172,6 +179,21 @@ export const claimDailyIncome = createServerFn({ method: "POST" })
     await supabaseAdmin.from("transactions").insert({
       user_id: userId, type: "rebate", amount: total, status: "success", description: "Daily task claim",
     });
+    // 3% commission to the upline (referrer) on subordinate's daily claim
+    const { data: myProfile } = await supabaseAdmin.from("profiles").select("referred_by").eq("id", userId).maybeSingle();
+    if ((myProfile as any)?.referred_by) {
+      const commission = Math.round(total * 0.03 * 100) / 100;
+      if (commission > 0) {
+        const { data: up } = await supabaseAdmin.from("profiles").select("balance").eq("id", (myProfile as any).referred_by).maybeSingle();
+        if (up) {
+          await supabaseAdmin.from("profiles").update({ balance: Number(up.balance) + commission }).eq("id", (myProfile as any).referred_by);
+          await supabaseAdmin.from("transactions").insert({
+            user_id: (myProfile as any).referred_by, type: "rebate", amount: commission,
+            status: "success", description: "3% subordinate daily task commission",
+          });
+        }
+      }
+    }
     return { ok: true, amount: total };
   });
 
@@ -280,17 +302,17 @@ export const createWithdrawal = createServerFn({ method: "POST" })
   }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    // Nairobi (UTC+3) business hours: Mon–Fri, 09:00–17:00
-    const now = new Date();
-    const nbo = new Date(now.getTime() + (3 * 60 - now.getTimezoneOffset() * -1) * 60_000);
-    // Simpler: compute Nairobi hour/day via UTC + 3
-    const utcMs = now.getTime();
+    // Nairobi (UTC+3) business hours: Mon–Fri 09:00–17:00, Sat 09:00–14:00
+    const utcMs = Date.now();
     const nboDate = new Date(utcMs + 3 * 3600_000);
     const day = nboDate.getUTCDay(); // 0 Sun .. 6 Sat
     const hour = nboDate.getUTCHours();
-    if (day === 0 || day === 6) throw new Error("Withdrawals are processed Mon–Fri only.");
-    if (hour < 9 || hour >= 17) throw new Error("Withdrawals are processed between 9:00 AM and 5:00 PM (EAT).");
-    void nbo;
+    if (day === 0) throw new Error("Withdrawals are processed Mon–Sat only.");
+    if (day === 6) {
+      if (hour < 9 || hour >= 14) throw new Error("Saturday withdrawals are processed between 9:00 AM and 2:00 PM (EAT).");
+    } else {
+      if (hour < 9 || hour >= 17) throw new Error("Withdrawals are processed between 9:00 AM and 5:00 PM (EAT).");
+    }
     const { data: settings } = await supabase.from("site_settings").select("withdrawals_enabled, min_withdrawal").eq("id", 1).maybeSingle();
     if (settings && settings.withdrawals_enabled === false) throw new Error("Withdrawals are currently suspended");
     if (settings && data.amount < Number(settings.min_withdrawal)) throw new Error(`Minimum withdrawal is KES ${settings.min_withdrawal}`);
