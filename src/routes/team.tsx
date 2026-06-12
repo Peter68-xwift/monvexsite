@@ -20,6 +20,7 @@ function Team() {
   const teamFn = useServerFn(getTeam);
   const { data: team } = useQuery({ queryKey: ["team"], queryFn: () => teamFn() });
   const code = me?.profile?.referral_code ?? "";
+  const userCode = (me?.profile as any)?.user_code ?? "";
   const link = typeof window !== "undefined" ? `${window.location.origin}/auth?ref=${code}` : `/auth?ref=${code}`;
   const [copied, setCopied] = useState(false);
   const s = team?.stats;
@@ -41,6 +42,7 @@ function Team() {
           <div>
             <p className="text-xs tracking-widest text-black/60">NETWORK</p>
             <h1 className="text-3xl font-extrabold">Affiliate Team</h1>
+            {userCode && <p className="text-xs mt-1 text-black/50">Member ID: <span className="font-bold text-black">#{userCode}</span></p>}
           </div>
           <button onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/auth", replace: true }); }} className="bg-black text-white px-5 py-2 rounded-full font-semibold text-sm">Logout</button>
         </div>
@@ -61,14 +63,19 @@ function Team() {
         <div className="mt-5 bg-white rounded-3xl p-5 shadow-md">
           <div className="flex items-center gap-2">
             <Link2 className="h-5 w-5 text-[#f5c518]" />
-            <p className="font-bold tracking-widest text-sm">REFERRAL LINK</p>
+            <p className="font-bold tracking-widest text-sm">YOUR UNIQUE INVITE LINK</p>
           </div>
+          <p className="text-xs text-muted-foreground mt-2">Share this link with your subordinates. They register through it and you earn <span className="font-bold text-black">10%</span> when they buy a package + <span className="font-bold text-black">3%</span> of their daily task income.</p>
           <div className="mt-3 flex gap-2">
             <input value={link} readOnly className="flex-1 bg-[#f5f5f7] rounded-full px-4 py-3 text-sm text-muted-foreground" />
             <button
               onClick={() => { navigator.clipboard.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
               className="bg-black text-white px-6 py-3 rounded-full font-semibold"
             >{copied ? "Copied" : "Copy"}</button>
+          </div>
+          <div className="mt-3 flex gap-2 text-xs">
+            <a href={`https://wa.me/?text=${encodeURIComponent(`Join me on Monvex — register here: ${link}`)}`} target="_blank" rel="noreferrer" className="flex-1 text-center bg-emerald-500 text-white rounded-full py-2 font-bold">Share WhatsApp</a>
+            <a href={`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent("Join me on Monvex")}`} target="_blank" rel="noreferrer" className="flex-1 text-center bg-sky-500 text-white rounded-full py-2 font-bold">Share Telegram</a>
           </div>
         </div>
 

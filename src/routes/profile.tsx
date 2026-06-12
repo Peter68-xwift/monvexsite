@@ -36,9 +36,9 @@ function Profile() {
         <h2 className="text-2xl font-extrabold mt-6">Earnings Overview</h2>
         <div className="mt-3 bg-white rounded-3xl p-5 shadow-md grid grid-cols-2 gap-y-5">
           <div><p className="text-xs tracking-widest text-muted-foreground">TOTAL REVENUE</p><p className="font-extrabold text-lg">{balance.toFixed(2)} KSH</p></div>
-          <div><p className="text-xs tracking-widest text-muted-foreground">REFERRAL CODE</p><p className="font-extrabold text-lg tracking-wider">{data?.profile?.referral_code ?? "—"}</p></div>
+          <div><p className="text-xs tracking-widest text-muted-foreground">MEMBER ID</p><p className="font-extrabold text-lg tracking-wider">#{(data?.profile as any)?.user_code ?? "—"}</p></div>
           <div><p className="text-xs tracking-widest text-muted-foreground">PHONE</p><p className="font-extrabold text-lg">{data?.profile?.phone ?? "—"}</p></div>
-          <div><p className="text-xs tracking-widest text-muted-foreground">MEMBER</p><p className="font-extrabold text-lg">{data?.profile?.created_at ? new Date(data.profile.created_at).toLocaleDateString() : "—"}</p></div>
+          <div><p className="text-xs tracking-widest text-muted-foreground">INVITE CODE</p><p className="font-extrabold text-lg tracking-wider">{data?.profile?.referral_code ?? "—"}</p></div>
         </div>
         <div className="mt-6 grid grid-cols-3 gap-3">
           <button className="bg-[#2563eb] text-white rounded-2xl py-4 font-bold">Recharge</button>

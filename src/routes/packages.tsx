@@ -62,7 +62,7 @@ function Packages() {
                 </div>
                 <div className="text-right">
                   <p className="text-xs tracking-widest text-muted-foreground">OWNED</p>
-                  <p className="text-xl font-bold text-emerald-500">{owned[p.code] ?? 0}</p>
+                  <p className="text-xl font-bold text-emerald-500">{owned[p.code] ?? 0}<span className="text-sm text-muted-foreground">/2</span></p>
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-2 mt-4">
@@ -80,11 +80,11 @@ function Packages() {
                 </div>
               </div>
               <button
-                disabled={busy === p.code || balance < Number(p.deposit)}
+                disabled={busy === p.code || balance < Number(p.deposit) || (owned[p.code] ?? 0) >= 2}
                 onClick={() => buy(p.code)}
                 className="mt-5 w-full bg-[#f5c518] rounded-full py-4 font-extrabold tracking-widest disabled:opacity-50"
               >
-                {busy === p.code ? "ACTIVATING…" : balance < Number(p.deposit) ? "INSUFFICIENT BALANCE" : "ACTIVATE NOW"}
+                {busy === p.code ? "ACTIVATING…" : (owned[p.code] ?? 0) >= 2 ? "MAX 2 PURCHASES REACHED" : balance < Number(p.deposit) ? "INSUFFICIENT BALANCE" : "ACTIVATE NOW"}
               </button>
             </div>
           ))}
