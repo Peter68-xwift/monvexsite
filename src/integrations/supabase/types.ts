@@ -140,6 +140,7 @@ export type Database = {
           referral_code: string
           referred_by: string | null
           updated_at: string
+          user_code: number
           withdrawal_enabled: boolean
         }
         Insert: {
@@ -153,6 +154,7 @@ export type Database = {
           referral_code: string
           referred_by?: string | null
           updated_at?: string
+          user_code?: number
           withdrawal_enabled?: boolean
         }
         Update: {
@@ -166,6 +168,7 @@ export type Database = {
           referral_code?: string
           referred_by?: string | null
           updated_at?: string
+          user_code?: number
           withdrawal_enabled?: boolean
         }
         Relationships: [
