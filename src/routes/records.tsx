@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Shell } from "@/components/Shell";
-import { ArrowLeft, ArrowDownToLine, ArrowUpFromLine, Users, Gift } from "lucide-react";
+import { ArrowLeft, ArrowDownToLine, ArrowUpFromLine, Users, Gift, ListOrdered } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -12,6 +12,7 @@ export const Route = createFileRoute("/records")({
 });
 
 const tabs = [
+  { id: "all", label: "All", Icon: ListOrdered, color: "bg-slate-800", type: undefined as undefined },
   { id: "deposit", label: "Deposit", Icon: ArrowDownToLine, color: "bg-emerald-500", type: "deposit" as const },
   { id: "withdrawal", label: "Withdrawal", Icon: ArrowUpFromLine, color: "bg-rose-500", type: "withdrawal" as const },
   { id: "referral", label: "Referral Rebate", Icon: Users, color: "bg-sky-500", type: "rebate" as const },
@@ -19,15 +20,26 @@ const tabs = [
 ] as const;
 
 function Records() {
-  const [tab, setTab] = useState<(typeof tabs)[number]["id"]>("deposit");
+  const [tab, setTab] = useState<(typeof tabs)[number]["id"]>("all");
   const active = tabs.find((t) => t.id === tab)!;
   const fn = useServerFn(listMyTransactions);
   const { data } = useQuery({
     queryKey: ["transactions", active.type],
-    queryFn: () => fn({ data: { type: active.type } }),
+    queryFn: () => fn({ data: active.type ? { type: active.type } : {} }),
   });
   const list = data?.rows ?? [];
   const total = list.reduce((s, t) => s + Math.abs(Number(t.amount)), 0);
+
+  function statusLabel(row: any) {
+    if (row.type === "withdrawal") {
+      if (row.status === "pending") return { text: "Waiting", cls: "bg-rose-100 text-rose-700" };
+      if (row.status === "success") return { text: "Paid", cls: "bg-blue-100 text-blue-700" };
+      return { text: row.status, cls: "bg-slate-100 text-slate-700" };
+    }
+    if (row.status === "success") return { text: "Success", cls: "bg-emerald-100 text-emerald-700" };
+    if (row.status === "pending") return { text: "Pending", cls: "bg-amber-100 text-amber-700" };
+    return { text: row.status, cls: "bg-rose-100 text-rose-700" };
+  }
 
   return (
     <Shell>
@@ -37,7 +49,7 @@ function Records() {
           <h1 className="text-2xl font-extrabold">Financial Records</h1>
         </div>
 
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-5 gap-2">
           {tabs.map(({ id, label, Icon, color }) => (
             <button
               key={id}
@@ -57,18 +69,23 @@ function Records() {
         </div>
 
         <div className="mt-4 bg-white rounded-3xl shadow-md divide-y divide-black/5">
-          {list.map((t, i) => (
-            <div key={t.id ?? i} className="px-5 py-4 flex items-center justify-between">
+          {list.map((t, i) => {
+            const s = statusLabel(t);
+            return (
+            <div key={t.id ?? i} className="px-5 py-4 flex items-center justify-between gap-3">
               <div>
-                <p className="font-bold">KES {Math.abs(Number(t.amount)).toLocaleString()}</p>
+                <p className="font-bold">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground mr-2">{t.type}</span>
+                  KES {Math.abs(Number(t.amount)).toLocaleString()}
+                </p>
                 <p className="text-xs text-muted-foreground">{t.description ?? t.reference ?? "—"}</p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">{new Date(t.created_at).toLocaleString()}</p>
               </div>
-              <span className={`text-xs font-bold px-3 py-1 rounded-full ${t.status === "success" ? "bg-emerald-100 text-emerald-700" : t.status === "pending" ? "bg-amber-100 text-amber-700" : "bg-rose-100 text-rose-700"}`}>
-                {t.status}
+              <span className={`text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap ${s.cls}`}>
+                {s.text}
               </span>
             </div>
-          ))}
+          );})}
           {list.length === 0 && <p className="px-5 py-6 text-center text-muted-foreground text-sm">No records yet.</p>}
         </div>
       </div>
