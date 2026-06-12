@@ -96,7 +96,7 @@ function WithdrawPage() {
           {step === "form" && (
             <form onSubmit={submit} className="space-y-4">
               <div className="rounded-2xl bg-amber-50 ring-1 ring-amber-100 p-3 space-y-1.5 text-xs text-amber-900">
-                <div className="flex items-center gap-2 font-semibold"><Clock className="h-3.5 w-3.5" /> Processed Mon–Fri, 9:00 AM – 5:00 PM (EAT)</div>
+                <div className="flex items-center gap-2 font-semibold"><Clock className="h-3.5 w-3.5" /> Mon–Fri 9:00 AM – 5:00 PM · Sat 9:00 AM – 2:00 PM (EAT)</div>
                 <div className="flex items-center gap-2 font-semibold"><Percent className="h-3.5 w-3.5" /> 10% tax fee deducted from every withdrawal</div>
                 <div className="flex items-center gap-2 font-semibold"><AlertCircle className="h-3.5 w-3.5" /> One withdrawal per account</div>
               </div>
