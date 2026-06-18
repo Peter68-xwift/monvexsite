@@ -11,5 +11,12 @@ export default defineConfig({
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
     server: { entry: "server" },
+    // Build for Node.js on Vercel instead of Cloudflare Workers
+    nitro: {
+      presets: ["node-server"],
+      output: {
+        dir: "dist/server",
+      },
+    },
   },
 });
