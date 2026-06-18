@@ -1,8 +1,10 @@
 {
   "buildCommand": "bun run build",
-  "outputDirectory": "dist/client",
   "framework": "tanstack-start",
-  "env": {
-    "NODE_ENV": "production"
-  }
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/api"
+    }
+  ]
 }
