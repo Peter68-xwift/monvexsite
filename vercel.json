@@ -1,32 +1,8 @@
 {
   "buildCommand": "bun run build",
   "outputDirectory": "dist/client",
-  "framework": "other",
-  "functions": {
-    "dist/server/**/*.js": {
-      "maxDuration": 60,
-      "memory": 1024
-    }
-  },
+  "framework": "tanstack-start",
   "env": {
     "NODE_ENV": "production"
-  },
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=3600, s-maxage=3600"
-        }
-      ]
-    }
-  ],
-  "routes": [
-    {
-      "src": "/health",
-      "dest": "/api/health",
-      "methods": ["GET"]
-    }
-  ]
+  }
 }
